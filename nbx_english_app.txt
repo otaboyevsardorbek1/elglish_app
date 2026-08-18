@@ -1,0 +1,343 @@
+# 📊 ENGLISH LEARN PLATFORM – TO'LIQ TZ TAHLILI VA XUSUSIYATLAR UMUMIY RO'YXATI
+
+Mana ikkala fayldagi barcha ma'lumotlarni **to'liq tahlil qilib**, barcha xususiyatlarni **turli toifalarga ajratib** umumlashtirib berdim. Bu sizga loyihani bir ko'zda ko'rish va qaysi funksiyalar borligini tez tushunish uchun qulay.
+
+---
+
+## 📈 UMUMIY STATISTIKA
+
+| Ko'rsatkich | Soni |
+|-------------|------|
+| **Jami xususiyatlar** | **100+** |
+| Funksional talablar | 25 |
+| Gamifikatsiya xususiyatlari | 18 |
+| AI/ML funksiyalar | 8 |
+| Ijtimoiy funksiyalar | 9 |
+| To'lov va biznes | 12 |
+| Analitika va hisobot | 11 |
+| Admin panel funksiyalari | 15 |
+| Telegram bot funksiyalari | 12 |
+| Xavfsizlik va qulaylik | 8 |
+| B2B/Korxona | 6 |
+| Mobil/Platforma | 5 |
+
+---
+
+## 📋 1. ASOSIY FUNKSIONAL TALABLAR (25 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **2 ta asosiy oyna** | IELTS va CEFR (SIFR) |
+| 2 | **3 ta bo'lim** | Beginner, Elementary, IELTS Step-by-step |
+| 3 | **30 tadan dars** | Har bir bo'limda 30 tadan (jami 90 ta) |
+| 4 | **10-15 savol** | Har bir darsda |
+| 5 | **4 variant + to'g'ri javob** | Har bir savolda |
+| 6 | **10 ta mo'l (stage)** | Har bir bo'limda |
+| 7 | **Har mo'lda 3 ta dars** | 30 ÷ 10 = 3 |
+| 8 | **Yulduzli baholash** | 0-3 yulduz tizimi |
+| 9 | **O'tish qoidalari** | 2-3 yulduz → keyingi bosqich |
+| 10 | **Darsni qayta o'qish** | 0-1 yulduz olganda |
+| 11 | **9 ta bepul dars** | Har bo'limdan 3 tadan |
+| 12 | **Sertifikat** | Oxirgi mo'lni tugatganda |
+| 13 | **Login/Register** | Email + parol |
+| 14 | **Profil** | Shaxsiy ma'lumotlar |
+| 15 | **Darslar ro'yxati** | Ochiq/yopiq holati |
+| 16 | **Dars o'ynash** | Savol-javob interfeysi |
+| 17 | **Natija oynasi** | Yulduzlar, keyingi dars |
+| 18 | **To'lov oynasi** | Karta ma'lumotlari, SMS-code |
+| 19 | **Progress saqlash** | Har bir bosqichda |
+| 20 | **Ko'p tillilik** | O'zbek, Rus, Ingliz |
+| 21 | **Temaviy darslar** | Grammar, Vocabulary, Reading, Listening, Writing |
+| 22 | **Ekspress test** | 5 daqiqalik tezkor test |
+| 23 | **Xatolar daftarchasi** | Barcha xatolar jamlanadi |
+| 24 | **Qiyinlik darajasi** | Easy/Medium/Hard |
+| 25 | **Kunlik maqsad** | 10 savol yoki 1 dars |
+
+---
+
+## 🎮 2. GAMIFIKATSIYA TIZIMI (18 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **XP (Tajriba ochkolari)** | Har bir harakat uchun XP |
+| 2 | **Level (Daraja)** | 1-10 darajalar |
+| 3 | **Leaderboard** | Haftalik, oylik, global reyting |
+| 4 | **Achievement (Yutuqlar)** | 10+ turli yutuqlar |
+| 5 | **Daily Streak** | Kunlik davomiylik |
+| 6 | **Mavsumiy turnirlar** | Har oyda "IELTS Master" |
+| 7 | **Treasure chest** | Har 5-darsda sindiq |
+| 8 | **Avatar va skinlar** | Shaxsiylashtirish |
+| 9 | **Clans (Klanlar)** | Jamoaviy o'qish |
+| 10 | **Clan vs Clan** | Haftalik klan musobaqasi |
+| 11 | **Mystery box** | Kunlik tasodifiy sovrin |
+| 12 | **Double XP event** | Dam olish kunlari 2x XP |
+| 13 | **Level up animation** | Yangi levelda animatsiya |
+| 14 | **Badge collection** | 50+ turli badge |
+| 15 | **Top 10 reyting** | Maxsus badge |
+| 16 | **Coin system** | Ichki valyuta |
+| 17 | **Shop** | Coinlarga skin/badge/dars |
+| 18 | **Lucky wheel** | Kunlik omadli g'ildirak |
+
+---
+
+## 🤖 3. AI VA INTELLEKTUAL FUNKSIYALAR (8 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **Adaptive Learning** | Foydalanuvchiga moslashuvchi o'quv |
+| 2 | **Smart Revision** | Aqlli takrorlash (24 soat, 3 kun, 7 kun, 30 kun) |
+| 3 | **Speaking Practice** | Mikrofon orqali, AI baholaydi |
+| 4 | **Writing Practice** | Matn yozish, AI tekshiradi |
+| 5 | **Xato tahlili** | Zaif tomonlarni aniqlash |
+| 6 | **Mock Test** | 2.5 soatlik real IELTS imtihoni |
+| 7 | **AI Chatbot** | Ingliz tilida suhbat |
+| 8 | **Grammar check** | AI grammatik tekshiruv |
+| 9 | **Text-to-Speech** | Matnni ovozli o'qib beradi |
+| 10 | **AI Essay checker** | IELTS essayni 9 ballik tizimda |
+| 11 | **Smart recommendations** | Keyingi darsni tavsiya qiladi |
+| 12 | **Voice speed control** | Audio darslarni sekin/tezlashtirish |
+| 13 | **Heatmap** | Faollik xaritasi |
+| 14 | **Progress prediction** | AI bashorati |
+| 15 | **Weakness radar chart** | 4 skill bo'yicha radar diagramma |
+
+---
+
+## 💬 4. IJTIMOIY FUNKSIYALAR (9 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **Guruhlar / Kreator** | O'qituvchilar guruh yaratadi |
+| 2 | **Do'stlar bilan musobaqa** | Challenge qilish |
+| 3 | **Sharhlar va baholash** | 5 yulduzli baho |
+| 4 | **Forum / Chat** | Ingliz tilida muloqot |
+| 5 | **Live stream darslar** | Jonli darslar |
+| 6 | **Peer review** | Bir-birini baholash |
+| 7 | **Mentorlik** | Yuqori darajali yordam |
+| 8 | **Guruh chaqiruvi** | Do'stlarni taklif qilish |
+| 9 | **Achievement share** | Telegram/Instagramda ulashish |
+| 10 | **Q&A sessiyalari** | Haftalik savol-javob |
+
+---
+
+## 💰 5. TO'LOV VA BIZNES MODEL (12 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **Click integratsiya** | To'lov tizimi |
+| 2 | **Payme integratsiya** | To'lov tizimi |
+| 3 | **Stripe integratsiya** | Xalqaro to'lov |
+| 4 | **Bir martalik dars** | $1.99/dars |
+| 5 | **Modul sotib olish** | $29.99/30 dars |
+| 6 | **PREMIUM** | $9.99/oy, 15% chegirma |
+| 7 | **ULTRA** | $19.99/oy, 30% chegirma |
+| 8 | **Test davri** | 7 kun bepul |
+| 9 | **Referral tizimi** | Do'stini taklif qil |
+| 10 | **Kupon va promokod** | Admin tomonidan |
+| 11 | **B2B (Maktablar)** | Maxsus narx |
+| 12 | **Gift card** | Do'stiga sovg'a |
+
+---
+
+## 📊 6. ANALITIKA VA HISOBOTLAR (11 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **Haftalik progress** | Grafik va diagramma |
+| 2 | **Oylik hisobot** | PDF/Excel formatda |
+| 3 | **Kuchsiz tomonlar** | AI tomonidan aniqlangan |
+| 4 | **Tavsiyalar** | Keyingi darslar |
+| 5 | **O'qituvchi hisoboti** | Guruh talabalari natijasi |
+| 6 | **Admin dashboard** | Real-time statistika |
+| 7 | **Yangi foydalanuvchilar** | Kunlik, haftalik, oylik |
+| 8 | **Daromad** | Bugun, shu oy, jami |
+| 9 | **Eng faol foydalanuvchilar** | TOP 10 |
+| 10 | **Eng mashhur darslar** | Ko'p sotilgan |
+| 11 | **To'lov statistikasi** | To'lov turlari bo'yicha |
+| 12 | **Time management report** | Qaysi savolga ko'p vaqt |
+| 13 | **Comparison with others** | Boshqalar bilan solishtirish |
+
+---
+
+## 📢 7. BILDIRISHNOMALAR TIZIMI (3 tur)
+
+| # | Tur | Tavsif |
+|---|-----|--------|
+| 1 | **Push-notifikatsiya** | Web browser orqali |
+| 2 | **Telegram bot** | Xabarlar orqali |
+| 3 | **Email** | Xabarnomalar |
+
+### 7.1. Bildirishnoma turlari
+| # | Hodisa | Xabar |
+|---|--------|-------|
+| 1 | Yangi dars ochildi | "Beginner 4-dars endi ochiq!" |
+| 2 | Streak xavfi | "Bugun kirmasangiz, streak uziladi!" |
+| 3 | Chegirma | "PREMIUMga 30% chegirma!" |
+| 4 | Eslatma | "Kechki o'qish vaqti!" |
+| 5 | To'lov tasdiqlandi | "To'lovingiz qabul qilindi" |
+| 6 | PREMIUM tugashi | "3 kundan keyin tugaydi" |
+
+---
+
+## 🔧 8. ADMIN PANEL FUNKSIYALARI (15 ta)
+
+| # | Funksiya | Tavsif |
+|---|----------|--------|
+| 1 | **Dars qo'shish** | Nomi, tavsifi, bo'lim, mo'l |
+| 2 | **Savol qo'shish** | Savol, 4 variant, to'g'ri javob |
+| 3 | **Excel import** | Batch yuklash (xlsx) |
+| 4 | **Darsni tahrirlash** | Barcha maydonlarni |
+| 5 | **Darsni o'chirish** | Soft delete |
+| 6 | **Foydalanuvchilarni ko'rish** | Barcha ro'yxat |
+| 7 | **Qidirish** | Ism, email, ID |
+| 8 | **Bloklash** | Foydalanuvchini |
+| 9 | **Daraja berish** | FREE, PREMIUM, ULTRA |
+| 10 | **To'lov tarixi** | Har bir foydalanuvchi |
+| 11 | **To'lovlar ro'yxati** | Barcha to'lovlar |
+| 12 | **Hisobot generatsiya** | PDF/Excel |
+| 13 | **Kupon yaratish** | Chegirma kodlari |
+| 14 | **Statistika** | Grafik va diagrammalar |
+| 15 | **Monitoring** | Sentry/LogRocket |
+
+---
+
+## 🤖 9. TELEGRAM BOT FUNKSIYALARI (12 ta)
+
+| # | Komanda | Tavsif |
+|---|---------|--------|
+| 1 | /start | Xush kelibsiz, asosiy menu |
+| 2 | /help | Yordam |
+| 3 | /profile | Profil: daraja, XP, yulduzlar, streak |
+| 4 | /lessons | Darslar ro'yxati |
+| 5 | /play | Testni boshlash |
+| 6 | /leaderboard | Reyting |
+| 7 | /achievements | Yutuqlar |
+| 8 | /payment | To'lov qilish |
+| 9 | /stats (admin) | Tizim statistikasi |
+| 10 | /users (admin) | Foydalanuvchilar soni |
+| 11 | /logs (admin) | So'nggi xatolar |
+| 12 | **Test jarayoni** | Savol + 4 variant, yulduzlar, natija |
+
+---
+
+## 🛡️ 10. XAVFSIZLIK VA QULAYLIK (8 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **JWT autentifikatsiya** | 7 kun muddat |
+| 2 | **Bcrypt parol** | Salt round 12 |
+| 3 | **Database backup** | Har 24 soatda |
+| 4 | **PCI DSS** | To'lov xavfsizligi |
+| 5 | **HTTPS** | SSL sertifikat |
+| 6 | **Rate limiting** | API himoyasi |
+| 7 | **Session management** | Qurilmalarni ko'rish |
+| 8 | **Data export** | GDPR shaffofligi |
+| 9 | **Biometric login** | Fingerprint/Face ID (mobil) |
+| 10 | **Dark mode** | Qorong'u rejim |
+| 11 | **Offline sync** | Internetsiz o'qish |
+
+---
+
+## 🏢 11. B2B VA KORXONA FUNKSIYALARI (6 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **Maktab dashboard** | Talabalarni kuzatish |
+| 2 | **Bulk invoicing** | Ommaviy to'lov |
+| 3 | **White-label** | O'z brendi bilan |
+| 4 | **API for schools** | Tizim integratsiyasi |
+| 5 | **Multi-teacher** | Bir nechta o'qituvchi |
+| 6 | **O'qituvchi hisobotlari** | Guruh natijalari |
+
+---
+
+## 📱 12. MOBIL VA PLATFORMALAR (5 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **PWA** | Web saytni mobil ilovadek |
+| 2 | **Android app** | Native ilova |
+| 3 | **iOS app** | Native ilova |
+| 4 | **Wearable support** | Smartwatch |
+| 5 | **Voice assistant** | Siri/Google Assistant |
+
+---
+
+## 🎯 13. IELTS MAXSUS FUNKSIYALAR (5 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **IELTS band calculator** | Real IELTS ball |
+| 2 | **Task 1 & 2 templates** | Writing shablonlari |
+| 3 | **Recent IELTS topics** | So'nggi mavzular |
+| 4 | **IELTS tips videos** | 5-10 daqiqali videolar |
+| 5 | **IELTS Speaking topics** | 50+ mavzu, sample answers |
+
+---
+
+## 🎁 14. BONUS VA SOVG'ALAR (4 ta)
+
+| # | Xususiyat | Tavsif |
+|---|-----------|--------|
+| 1 | **Birthday bonus** | Tug'ilgan kunda 2x XP |
+| 2 | **Coin system** | Ichki valyuta |
+| 3 | **Shop** | Skinlar, badge, dars |
+| 4 | **Lucky wheel** | Omadli g'ildirak |
+
+---
+
+## 📋 PRIORITET BO'YICHA TAVSIYA
+
+| Bosqich | Vaqt | Xususiyatlar |
+|---------|------|--------------|
+| **1-bosqich (MVP)** | 1-2 oy | Asosiy tizim (Login, Darslar, Savollar, Admin panel) |
+| **2-bosqich** | 3-4 oy | Gamifikatsiya (XP, Leaderboard, Achievement, Streak) |
+| **3-bosqich** | 5-6 oy | To'lov (Click, Payme, Stripe), Premium/ULTRA |
+| **4-bosqich** | 7-8 oy | AI funksiyalar (Speaking, Writing, Adaptive Learning) |
+| **5-bosqich** | 9-10 oy | Telegram bot, Ijtimoiy funksiyalar |
+| **6-bosqich** | 11-12 oy | B2B, Mobil app, Bonus funksiyalar |
+
+---
+
+## 🏆 XULOSA
+
+Platformangizda **100+ xususiyat** mavjud bo'lib, u quyidagilarni o'z ichiga oladi:
+
+✅ **Asosiy tizim** – 25 funksiya  
+✅ **Gamifikatsiya** – 18 funksiya  
+✅ **AI/ML** – 8+ funksiya  
+✅ **Ijtimoiy** – 9 funksiya  
+✅ **To'lov** – 12 funksiya  
+✅ **Analitika** – 11 funksiya  
+✅ **Admin panel** – 15 funksiya  
+✅ **Telegram bot** – 12 funksiya  
+✅ **Xavfsizlik** – 8 funksiya  
+✅ **B2B** – 6 funksiya  
+✅ **Mobil** – 5 funksiya  
+✅ **IELTS maxsus** – 5 funksiya  
+✅ **Bonus** – 4 funksiya
+
+---
+
+## ❌ KAMCHILIKLAR VA TAVSIYALAR
+
+| # | Kamchilik | Tavsiya |
+|---|-----------|---------|
+| 1 | 100+ funksiya juda ko'p | **MVP** (eng muhim 20-30 funksiya) dan boshlang |
+| 2 | 60 kun juda qisqa muddat | Vaqtni **8-12 oy** ga uzaytirish kerak |
+| 3 | Byudjet hisob-kitobi yo'q | Har bir funksiya uchun alohida hisob-kitob qiling |
+| 4 | Xodimlar soni ko'rsatilmagan | 5-10 dasturchi kerak bo'ladi |
+| 5 | Test rejasi batafsil emas | Unit test, Integration test, UAT test rejasini yozing |
+| 6 | Marketing strategiyasi yo'q | Platformani qanday targ'ib qilish rejasini tuzing |
+
+---
+
+## 📌 KEYINGI QADAM
+
+Endi:
+
+1. **Qaysi funksiyalar MVP** (birinchi versiya) uchun kerakligini tanlang
+2. **Byudjet** va **vaqt** cheklovlarini aniqlang
+3. **Dasturchilar** sonini belgilang
+4. **Bosqichma-bosqich** ish rejasini tuzing
+
+Yozing, hammasini tartibga solib beraman! 🚀
