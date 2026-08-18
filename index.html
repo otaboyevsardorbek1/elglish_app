@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnglishLearn — Toʻliq Demo Prototip</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* Qoʻshimcha stil va animatsiyalar */
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #f8fafc;
+        }
+        .container-custom { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+        .page-section { display: none; animation: fadeIn 0.25s ease; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { 0% { opacity:0; transform:translateY(6px); } 100% { opacity:1; transform:translateY(0); } }
+
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.07); }
+
+        .star-filled { color: #facc15; }
+        .star-empty { color: #d1d5db; }
+
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #1e293b; font-weight: 600; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
+        .tab-inactive:hover { color: #1e293b; }
+
+        .modal-bg { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .progress-bar-animated { transition: width 0.5s ease; }
+
+        .lesson-locked { opacity: 0.6; filter: grayscale(0.3); pointer-events: none; }
+        .avatar-ring { border: 3px solid #e2e8f0; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+
+        /* lesson player options */
+        .option-btn {
+            transition: all 0.15s;
+            border: 2px solid #e2e8f0;
+        }
+        .option-btn:hover:not(.selected) { border-color: #94a3b8; background: #f1f5f9; }
+        .option-btn.selected { border-color: #3b82f6; background: #eff6ff; }
+        .option-btn.correct { border-color: #22c55e; background: #f0fdf4; }
+        .option-btn.wrong { border-color: #ef4444; background: #fef2f2; }
+        .option-btn.disabled { pointer-events: none; }
+
+        .result-card { transition: all 0.3s; }
+    </style>
+</head>
+<body>
+
+<!-- ==================== NAVBAR ==================== -->
+<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60">
+    <div class="container-custom flex items-center justify-between h-16">
+        <a href="#" class="flex items-center gap-2 text-xl font-bold text-slate-800" onclick="navigateTo('dashboard')">
+            <span class="text-2xl">📚</span>
+            <span>English<span class="text-blue-600">Learn</span></span>
+        </a>
+
+        <!-- Desktop nav -->
+        <nav class="hidden md:flex items-center gap-1">
+            <button onclick="navigateTo('dashboard')" class="nav-btn px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition" data-page="dashboard">Bosh sahifa</button>
+            <button onclick="navigateTo('lessons')" class="nav-btn px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition" data-page="lessons">Darslar</button>
+            <button onclick="navigateTo('leaderboard')" class="nav-btn px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition" data-page="leaderboard">Reyting</button>
+            <button onclick="navigateTo('profile')" class="nav-btn px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition" data-page="profile">Profil</button>
+            <div class="w-px h-6 bg-slate-200 mx-2"></div>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-slate-700" id="userNameDisplay">Sarvar</span>
+                <button onclick="handleLogout()" class="text-sm text-red-500 hover:text-red-700 transition"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </nav>
+
+        <!-- Mobile toggle -->
+        <button id="mobileMenuBtn" class="md:hidden text-slate-700 text-xl" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden border-t border-slate-200 bg-white px-4 py-3 space-y-2">
+        <button onclick="navigateTo('dashboard'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100">Bosh sahifa</button>
+        <button onclick="navigateTo('lessons'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100">Darslar</button>
+        <button onclick="navigateTo('leaderboard'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100">Reyting</button>
+        <button onclick="navigateTo('profile'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100">Profil</button>
+        <hr class="my-2" />
+        <div class="flex items-center justify-between px-3 py-2">
+            <span class="text-sm font-medium" id="mobileUserName">Sarvar</span>
+            <button onclick="handleLogout()" class="text-red-500"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </div>
+</header>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<main class="container-custom py-6">
+
+    <!-- ======== DASHBOARD ======== -->
+    <section id="page-dashboard" class="page-section active">
+        <!-- Welcome -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">👋 Salom, <span id="dashUserName">Sarvar</span></h1>
+                <p class="text-slate-500">Bugungi o‘quv rejangizni davom eting</p>
+            </div>
+            <div class="flex gap-2 mt-3 sm:mt-0">
+                <button class="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition flex items-center gap-2"><i class="far fa-calendar-alt"></i> Kunlik maqsad</button>
+                <button class="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition"><i class="fas fa-cog"></i></button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-slate-500">Daraja</p><p class="text-2xl font-bold text-slate-800" id="dashLevel">4</p></div>
+                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-trophy"></i></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-slate-500">XP</p><p class="text-2xl font-bold text-slate-800" id="dashXp">320</p></div>
+                    <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-bolt"></i></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-slate-500">Streak</p><p class="text-2xl font-bold text-slate-800" id="dashStreak">7 🔥</p></div>
+                    <div class="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600"><i class="fas fa-fire"></i></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-slate-500">Tangalar</p><p class="text-2xl font-bold text-slate-800" id="dashCoins">🪙 145</p></div>
+                    <div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600"><i class="fas fa-coins"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- XP progress -->
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 mb-6">
+            <div class="flex justify-between text-sm mb-1">
+                <span class="text-slate-600">XP progress</span>
+                <span class="text-slate-600" id="xpProgressText">320 / 500</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5">
+                <div id="xpProgressBar" class="bg-blue-600 h-2.5 rounded-full progress-bar-animated" style="width: 64%;"></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">Keyingi daraja uchun 180 XP qoldi</p>
+        </div>
+
+        <!-- Sections -->
+        <h2 class="text-lg font-semibold text-slate-800 mb-3">📚 Bo‘limlar</h2>
+        <div class="grid md:grid-cols-3 gap-5 mb-8" id="sectionsContainer">
+            <!-- dynamically filled by JS -->
+        </div>
+
+        <!-- Recent activity -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+            <h3 class="font-semibold text-slate-800 mb-3">📊 So‘nggi faoliyat</h3>
+            <div id="recentActivity" class="space-y-3">
+                <!-- filled by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== LESSONS ======== -->
+    <section id="page-lessons" class="page-section">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <h2 class="text-2xl font-bold text-slate-800">📖 Barcha darslar</h2>
+            <div class="flex gap-2 mt-2 sm:mt-0" id="sectionFilter">
+                <button class="filter-btn px-4 py-2 text-sm bg-blue-600 text-white rounded-lg" data-section="all">Hammasi</button>
+                <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="BEGINNER">Beginner</button>
+                <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="ELEMENTARY">Elementary</button>
+                <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="IELTS">IELTS</button>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600 border-b">
+                    <tr>
+                        <th class="px-5 py-3 text-left font-medium">Dars</th>
+                        <th class="px-5 py-3 text-left font-medium">Bo‘lim</th>
+                        <th class="px-5 py-3 text-left font-medium">Holat</th>
+                        <th class="px-5 py-3 text-left font-medium">Yulduzlar</th>
+                        <th class="px-5 py-3 text-left font-medium"></th>
+                    </tr>
+                </thead>
+                <tbody id="lessonsTableBody">
+                    <!-- filled by JS -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ======== LEADERBOARD ======== -->
+    <section id="page-leaderboard" class="page-section">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">🏆 Reyting</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+            <div class="flex gap-4 mb-4">
+                <button class="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg">Haftalik</button>
+                <button class="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50">Oylik</button>
+                <button class="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50">Global</button>
+            </div>
+            <div id="leaderboardList" class="space-y-3">
+                <!-- filled by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== PROFILE ======== -->
+    <section id="page-profile" class="page-section">
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 text-center">
+                    <div class="relative inline-block">
+                        <div class="w-28 h-28 rounded-full bg-blue-100 flex items-center justify-center text-4xl text-blue-600 mx-auto avatar-ring"><i class="fas fa-user"></i></div>
+                        <span class="absolute bottom-1 right-1 bg-green-500 border-2 border-white rounded-full w-4 h-4"></span>
+                    </div>
+                    <h3 class="mt-3 text-xl font-bold text-slate-800" id="profileName">Sarvar</h3>
+                    <p class="text-sm text-slate-500" id="profileEmail">sarvar@email.com</p>
+                    <div class="mt-4 flex justify-center gap-2">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full" id="profileLevel">Daraja 4</span>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">PREMIUM</span>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="text-left space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-500">Umumiy XP</span><span class="font-medium" id="profileXp">320</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Tangalar</span><span class="font-medium" id="profileCoins">145</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Streak</span><span class="font-medium" id="profileStreak">7 kun</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Yakunlangan darslar</span><span class="font-medium" id="profileCompleted">4</span></div>
+                    </div>
+                    <button class="mt-4 w-full py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition text-sm">Sozlamalar</button>
+                </div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                    <h4 class="font-semibold text-slate-800 mb-4">📈 Statistika</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">O‘rtacha ball</p><p class="text-2xl font-bold text-slate-800">76%</p></div>
+                        <div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Eng yaxshi natija</p><p class="text-2xl font-bold text-slate-800">3⭐</p></div>
+                        <div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Jami vaqt</p><p class="text-2xl font-bold text-slate-800">2.5 soat</p></div>
+                        <div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Yutuqlar</p><p class="text-2xl font-bold text-slate-800">3</p></div>
+                    </div>
+                    <div class="mt-6">
+                        <h5 class="font-medium text-slate-700 mb-2">Zaif tomonlar</h5>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-full">Listening</span>
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">Vocabulary</span>
+                            <span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full">Grammar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== LESSON PLAYER (dynamic) ======== -->
+    <section id="page-player" class="page-section">
+        <!-- content will be injected by JS -->
+    </section>
+
+    <!-- ======== RESULT SCREEN (dynamic) ======== -->
+    <section id="page-result" class="page-section">
+        <!-- content will be injected by JS -->
+    </section>
+
+</main>
+
+<!-- ==================== LOGIN MODAL ==================== -->
+<div id="loginModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-[fadeIn_0.2s_ease]">
+        <button onclick="closeLoginModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fas fa-times"></i></button>
+        <div class="text-center mb-5">
+            <span class="text-3xl">📚</span>
+            <h2 class="text-2xl font-bold text-slate-800 mt-1">Kirish</h2>
+            <p class="text-sm text-slate-500">Hisobingizga kiring</p>
+        </div>
+        <form onsubmit="event.preventDefault(); handleLogin();">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input type="email" id="loginEmail" class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="sarvar@email.com" value="sarvar@email.com" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Parol</label>
+                <input type="password" id="loginPassword" class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" value="123456" />
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Kirish</button>
+        </form>
+        <p class="text-center text-sm text-slate-500 mt-4">
+            Hisobingiz yo‘qmi? <a href="#" class="text-blue-600 hover:underline" onclick="event.preventDefault(); alert('Ro‘yxatdan o‘tish (demo)');">Ro‘yxatdan o‘tish</a>
+        </p>
+    </div>
+</div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+    // ============================================================
+    //  STATIC DATA (demo)
+    // ============================================================
+    const USER = {
+        name: 'Sarvar',
+        email: 'sarvar@email.com',
+        level: 4,
+        xp: 320,
+        coins: 145,
+        streak: 7,
+        completedLessons: 4,
+        totalLessons: 10,
+        nextLevelXp: 500
+    };
+
+    const SECTIONS = [
+        { id: 'BEGINNER', label: '📖 Beginner', icon: '📖', color: 'blue' },
+        { id: 'ELEMENTARY', label: '🌟 Elementary', icon: '🌟', color: 'green' },
+        { id: 'IELTS', label: '🎯 IELTS', icon: '🎯', color: 'purple' }
+    ];
+
+    const LESSONS = [
+        { id: 'l1', title: 'Greetings', section: 'BEGINNER', stage: 1, isFree: true, completed: true, stars: 2, locked: false },
+        { id: 'l2', title: 'Family', section: 'BEGINNER', stage: 2, isFree: true, completed: false, stars: 0, locked: false },
+        { id: 'l3', title: 'Daily Routine', section: 'BEGINNER', stage: 3, isFree: false, completed: false, stars: 0, locked: true },
+        { id: 'l4', title: 'Food', section: 'BEGINNER', stage: 4, isFree: false, completed: false, stars: 0, locked: true },
+        { id: 'l5', title: 'Shopping', section: 'BEGINNER', stage: 5, isFree: false, completed: false, stars: 0, locked: true },
+        { id: 'e1', title: 'Numbers', section: 'ELEMENTARY', stage: 1, isFree: true, completed: true, stars: 3, locked: false },
+        { id: 'e2', title: 'Time', section: 'ELEMENTARY', stage: 2, isFree: true, completed: false, stars: 0, locked: false },
+        { id: 'e3', title: 'Weather', section: 'ELEMENTARY', stage: 3, isFree: false, completed: false, stars: 0, locked: true },
+        { id: 'i1', title: 'IELTS Intro', section: 'IELTS', stage: 1, isFree: false, completed: false, stars: 0, locked: true },
+        { id: 'i2', title: 'IELTS Listening', section: 'IELTS', stage: 2, isFree: false, completed: false, stars: 0, locked: true }
+    ];
+
+    // Questions for lesson l2 (Family)
+    const QUESTIONS_L2 = [
+        { id: 'q1', text: 'What is the father of your father called?', options: ['Uncle', 'Grandfather', 'Brother', 'Cousin'], correct: 'Grandfather' },
+        { id: 'q2', text: 'Your mother\'s sister is your ...', options: ['Aunt', 'Uncle', 'Cousin', 'Grandmother'], correct: 'Aunt' },
+        { id: 'q3', text: 'How many people are in a nuclear family?', options: ['2-4', '5-7', '8-10', '10+'], correct: '2-4' },
+        { id: 'q4', text: 'Your brother\'s son is your ...', options: ['Nephew', 'Cousin', 'Uncle', 'Grandson'], correct: 'Nephew' }
+    ];
+
+    // Questions for lesson e1 (Numbers)
+    const QUESTIONS_E1 = [
+        { id: 'q1', text: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: '4' },
+        { id: 'q2', text: 'What number comes after 9?', options: ['8', '9', '10', '11'], correct: '10' },
+        { id: 'q3', text: 'How many zeros in one hundred?', options: ['1', '2', '3', '4'], correct: '2' }
+    ];
+
+    const LEADERBOARD = [
+        { name: 'Dilshod', xp: 1280, rank: 1, badge: '🏅' },
+        { name: 'Gulnora', xp: 1120, rank: 2, badge: '' },
+        { name: 'Jasur', xp: 980, rank: 3, badge: '' },
+        { name: 'Sarvar', xp: 320, rank: 4, badge: '⭐' },
+        { name: 'Madina', xp: 290, rank: 5, badge: '' }
+    ];
+
+    const RECENT_ACTIVITY = [
+        { title: 'Beginner: Greetings', stars: 2, date: 'Bugun 14:30' },
+        { title: 'Beginner: Family', stars: 1, date: 'Kecha 10:15' },
+        { title: 'Elementary: Numbers', stars: 3, date: '2 kun oldin' }
+    ];
+
+    // ============================================================
+    //  STATE
+    // ============================================================
+    let currentPage = 'dashboard';
+    let currentLessonId = null;
+    let playerState = {
+        currentQuestion: 0,
+        selectedAnswers: {},
+        timeSpent: 0,
+        timerInterval: null,
+        questions: [],
+        lessonData: null
+    };
+    let resultData = null;
+
+    // ============================================================
+    //  NAVIGATION
+    // ============================================================
+    function navigateTo(page, data = null) {
+        // hide all pages
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('page-' + page);
+        if (target) target.classList.add('active');
+
+        // update nav buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('bg-slate-100', 'font-semibold');
+            if (btn.dataset.page === page) btn.classList.add('bg-slate-100', 'font-semibold');
+        });
+
+        currentPage = page;
+
+        // if player or result, stop timer
+        if (page !== 'player' && playerState.timerInterval) {
+            clearInterval(playerState.timerInterval);
+            playerState.timerInterval = null;
+        }
+
+        // render content if needed
+        if (page === 'dashboard') renderDashboard();
+        else if (page === 'lessons') renderLessons('all');
+        else if (page === 'leaderboard') renderLeaderboard();
+        else if (page === 'profile') renderProfile();
+        else if (page === 'player' && data) renderPlayer(data);
+        else if (page === 'result' && data) renderResult(data);
+    }
+
+    function toggleMobileMenu() {
+        document.getElementById('mobileMenu').classList.toggle('hidden');
+    }
+
+    // ============================================================
+    //  RENDER FUNCTIONS
+    // ============================================================
+    function renderDashboard() {
+        document.getElementById('dashUserName').textContent = USER.name;
+        document.getElementById('dashLevel').textContent = USER.level;
+        document.getElementById('dashXp').textContent = USER.xp;
+        document.getElementById('dashStreak').textContent = USER.streak + ' 🔥';
+        document.getElementById('dashCoins').textContent = '🪙 ' + USER.coins;
+        document.getElementById('xpProgressText').textContent = USER.xp + ' / ' + USER.nextLevelXp;
+        const pct = Math.min(100, (USER.xp / USER.nextLevelXp) * 100);
+        document.getElementById('xpProgressBar').style.width = pct + '%';
+
+        // sections
+        const container = document.getElementById('sectionsContainer');
+        container.innerHTML = '';
+        SECTIONS.forEach(sec => {
+            const lessons = LESSONS.filter(l => l.section === sec.id);
+            const completed = lessons.filter(l => l.completed).length;
+            const stars = lessons.filter(l => l.completed).reduce((sum, l) => sum + l.stars, 0);
+            const avgStars = completed > 0 ? (stars / completed).toFixed(1) : '-';
+            const locked = lessons.every(l => l.locked);
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-sm border border-slate-100 p-5 card-hover' + (locked ? ' opacity-60' : '');
+            card.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div><h3 class="font-bold text-slate-800">${sec.icon} ${sec.label}</h3><p class="text-sm text-slate-500">${lessons.length} ta dars</p></div>
+                    <span class="text-xs ${locked ? 'bg-slate-200 text-slate-600' : 'bg-blue-50 text-blue-700'} px-2 py-0.5 rounded-full">${locked ? '🔒 Yopiq' : avgStars + '⭐'}</span>
+                </div>
+                <div class="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                    <span>${completed}/${lessons.length} yakunlangan</span>
+                    ${completed > 0 ? `<span class="text-blue-500">•</span><span>${avgStars} yulduz</span>` : ''}
+                </div>
+                <button class="mt-4 w-full py-2 ${locked ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'} rounded-lg text-sm font-medium transition flex items-center justify-center gap-2" 
+                        ${locked ? 'disabled' : `onclick="navigateTo('lessons'); setTimeout(() => filterLessons('${sec.id}'), 100);"`}>
+                    <i class="fas ${locked ? 'fa-lock' : 'fa-play'}"></i> ${locked ? 'Yopiq' : 'Davom etish'}
+                </button>
+            `;
+            container.appendChild(card);
+        });
+
+        // recent activity
+        const actContainer = document.getElementById('recentActivity');
+        actContainer.innerHTML = '';
+        if (RECENT_ACTIVITY.length === 0) {
+            actContainer.innerHTML = '<p class="text-slate-400 text-center py-4">Hali hech qanday dars yakunlanmagan</p>';
+        } else {
+            RECENT_ACTIVITY.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-slate-50 rounded-lg';
+                const starsHtml = Array.from({ length: 3 }, (_, i) =>
+                    `<i class="fas fa-star ${i < item.stars ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+                ).join('');
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="flex">${starsHtml}</div>
+                        <span class="font-medium text-slate-700">${item.title}</span>
+                    </div>
+                    <span class="text-sm text-slate-400">${item.date}</span>
+                `;
+                actContainer.appendChild(div);
+            });
+        }
+    }
+
+    function renderLessons(filter = 'all') {
+        const tbody = document.getElementById('lessonsTableBody');
+        tbody.innerHTML = '';
+        let filtered = LESSONS;
+        if (filter !== 'all') filtered = LESSONS.filter(l => l.section === filter);
+        // sort by section, stage
+        filtered.sort((a, b) => a.section.localeCompare(b.section) || a.stage - b.stage);
+        filtered.forEach(lesson => {
+            const tr = document.createElement('tr');
+            tr.className = 'border-b hover:bg-slate-50 transition' + (lesson.locked ? ' opacity-60' : '');
+            const statusText = lesson.completed ? 'Yakunlangan' : (lesson.locked ? 'Yopiq' : 'Davom etmoqda');
+            const statusIcon = lesson.completed ? 'fa-check-circle text-green-600' : (lesson.locked ? 'fa-lock text-slate-400' : 'fa-clock text-yellow-600');
+            const starsHtml = Array.from({ length: 3 }, (_, i) =>
+                `<i class="fas fa-star ${i < lesson.stars ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+            ).join('');
+            const actionBtn = lesson.completed ?
+                `<button class="text-blue-600 hover:underline text-sm" onclick="viewLesson('${lesson.id}')">Ko‘rish</button>` :
+                (lesson.locked ? `<span class="text-slate-400 text-sm">2+ yulduz kerak</span>` :
+                `<button class="text-blue-600 hover:underline text-sm" onclick="startLesson('${lesson.id}')">Davom etish</button>`);
+            tr.innerHTML = `
+                <td class="px-5 py-3 font-medium text-slate-700">${lesson.title}</td>
+                <td class="px-5 py-3 text-slate-500">${lesson.section}</td>
+                <td class="px-5 py-3"><span class="inline-flex items-center gap-1 ${lesson.completed ? 'text-green-600' : (lesson.locked ? 'text-slate-400' : 'text-yellow-600')}"><i class="fas ${statusIcon}"></i> ${statusText}</span></td>
+                <td class="px-5 py-3"><div class="flex">${starsHtml}</div></td>
+                <td class="px-5 py-3">${actionBtn}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterLessons(section) {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('border', 'border-slate-200', 'bg-transparent', 'text-slate-700');
+            if (btn.dataset.section === section) {
+                btn.classList.remove('border', 'border-slate-200', 'bg-transparent', 'text-slate-700');
+                btn.classList.add('bg-blue-600', 'text-white');
+            }
+        });
+        renderLessons(section);
+    }
+
+    // filter buttons event
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterLessons(this.dataset.section);
+            });
+        });
+    });
+
+    function renderLeaderboard() {
+        const container = document.getElementById('leaderboardList');
+        container.innerHTML = '';
+        LEADERBOARD.forEach((item, idx) => {
+            const isUser = item.name === USER.name;
+            const div = document.createElement('div');
+            div.className = `flex items-center gap-4 p-3 rounded-lg ${isUser ? 'bg-blue-50 border border-blue-200' : 'bg-slate-50'}`;
+            div.innerHTML = `
+                <span class="font-bold ${idx === 0 ? 'text-blue-600' : 'text-slate-400'} w-6">${item.rank}</span>
+                ${item.badge ? `<i class="fas fa-crown text-yellow-400 text-xl"></i>` : ''}
+                <span class="font-medium flex-1">${item.name} ${isUser ? '(siz)' : ''}</span>
+                <span class="text-sm text-slate-500">${item.xp} XP</span>
+                ${item.badge ? `<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">${item.badge}</span>` : ''}
+                ${isUser ? `<span class="text-xs bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full">Siz</span>` : ''}
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderProfile() {
+        document.getElementById('profileName').textContent = USER.name;
+        document.getElementById('profileEmail').textContent = USER.email;
+        document.getElementById('profileLevel').textContent = 'Daraja ' + USER.level;
+        document.getElementById('profileXp').textContent = USER.xp;
+        document.getElementById('profileCoins').textContent = USER.coins;
+        document.getElementById('profileStreak').textContent = USER.streak + ' kun';
+        document.getElementById('profileCompleted').textContent = LESSONS.filter(l => l.completed).length;
+    }
+
+    // ============================================================
+    //  LESSON PLAYER
+    // ============================================================
+    function getLessonQuestions(lessonId) {
+        if (lessonId === 'l2') return QUESTIONS_L2;
+        if (lessonId === 'e1') return QUESTIONS_E1;
+        // default
+        return [
+            { id: 'q1', text: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: '4' },
+            { id: 'q2', text: 'What is the capital of Uzbekistan?', options: ['Tashkent', 'Samarkand', 'Bukhara', 'Andijan'], correct: 'Tashkent' }
+        ];
+    }
+
+    function startLesson(lessonId) {
+        const lesson = LESSONS.find(l => l.id === lessonId);
+        if (!lesson || lesson.locked) return;
+        currentLessonId = lessonId;
+        const questions = getLessonQuestions(lessonId);
+        playerState.questions = questions;
+        playerState.currentQuestion = 0;
+        playerState.selectedAnswers = {};
+        playerState.timeSpent = 0;
+        playerState.lessonData = lesson;
+        if (playerState.timerInterval) clearInterval(playerState.timerInterval);
+        playerState.timerInterval = setInterval(() => {
+            playerState.timeSpent++;
+            const timerEl = document.getElementById('playerTimer');
+            if (timerEl) {
+                const mins = Math.floor(playerState.timeSpent / 60);
+                const secs = playerState.timeSpent % 60;
+                timerEl.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            }
+        }, 1000);
+        navigateTo('player', { lesson, questions });
+    }
+
+    function renderPlayer(data) {
+        const container = document.getElementById('page-player');
+        const { lesson, questions } = data;
+        const q = questions[playerState.currentQuestion];
+        const total = questions.length;
+        const progress = ((playerState.currentQuestion + 1) / total) * 100;
+
+        let optionsHtml = '';
+        q.options.forEach((opt, idx) => {
+            const isSelected = playerState.selectedAnswers[q.id] === opt;
+            optionsHtml += `
+                <button class="option-btn w-full text-left p-4 rounded-lg ${isSelected ? 'selected' : ''}" 
+                        onclick="selectAnswer('${q.id}', '${opt}')">
+                    <div class="flex items-center gap-3">
+                        <span class="font-medium text-slate-500">${String.fromCharCode(65 + idx)}.</span>
+                        <span>${opt}</span>
+                        ${isSelected ? '<i class="fas fa-check text-blue-500 ml-auto"></i>' : ''}
+                    </div>
+                </button>
+            `;
+        });
+
+        container.innerHTML = `
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2 text-sm text-slate-500">
+                            <i class="fas fa-clock"></i>
+                            <span id="playerTimer">00:00</span>
+                        </div>
+                        <div class="text-sm text-slate-500">${playerState.currentQuestion + 1} / ${total}</div>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                        <div class="bg-blue-600 h-2.5 rounded-full progress-bar-animated" style="width: ${progress}%;"></div>
+                    </div>
+                    <h3 class="text-lg font-medium mb-4">${q.text}</h3>
+                    <div class="space-y-3" id="optionsContainer">
+                        ${optionsHtml}
+                    </div>
+                    <div class="flex justify-between mt-6 pt-6 border-t">
+                        <button class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition disabled:opacity-50" 
+                                onclick="prevQuestion()" ${playerState.currentQuestion === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-left mr-2"></i> Oldingi
+                        </button>
+                        <div class="flex gap-2">
+                            ${playerState.currentQuestion === total - 1 ?
+                                `<button class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition" onclick="submitLesson()">
+                                    <i class="fas fa-check mr-2"></i> Darsni yakunlash
+                                </button>` :
+                                `<button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" onclick="nextQuestion()">
+                                    Keyingi <i class="fas fa-arrow-right ml-2"></i>
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-slate-400 text-center">
+                        ${Object.keys(playerState.selectedAnswers).length} / ${total} savolga javob berildi
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function selectAnswer(qId, opt) {
+        playerState.selectedAnswers[qId] = opt;
+        // re-render current question to update UI
+        const q = playerState.questions[playerState.currentQuestion];
+        const container = document.getElementById('optionsContainer');
+        if (!container) return;
+        const btns = container.querySelectorAll('.option-btn');
+        btns.forEach((btn, idx) => {
+            const optText = q.options[idx];
+            if (playerState.selectedAnswers[q.id] === optText) {
+                btn.classList.add('selected');
+                // add check icon if not present
+                if (!btn.querySelector('.fa-check')) {
+                    const span = btn.querySelector('div');
+                    const check = document.createElement('i');
+                    check.className = 'fas fa-check text-blue-500 ml-auto';
+                    span.appendChild(check);
+                }
+            } else {
+                btn.classList.remove('selected');
+                const check = btn.querySelector('.fa-check');
+                if (check) check.remove();
+            }
+        });
+    }
+
+    function nextQuestion() {
+        if (playerState.currentQuestion < playerState.questions.length - 1) {
+            playerState.currentQuestion++;
+            const q = playerState.questions[playerState.currentQuestion];
+            // re-render player with updated data
+            const lesson = playerState.lessonData;
+            navigateTo('player', { lesson, questions: playerState.questions });
+        }
+    }
+
+    function prevQuestion() {
+        if (playerState.currentQuestion > 0) {
+            playerState.currentQuestion--;
+            const lesson = playerState.lessonData;
+            navigateTo('player', { lesson, questions: playerState.questions });
+        }
+    }
+
+    function submitLesson() {
+        const total = playerState.questions.length;
+        const answered = Object.keys(playerState.selectedAnswers).length;
+        if (answered < total) {
+            alert('Savollarning hammasiga javob bering!');
+            return;
+        }
+        // calculate result
+        let correct = 0;
+        const results = playerState.questions.map(q => {
+            const isCorrect = playerState.selectedAnswers[q.id] === q.correct;
+            if (isCorrect) correct++;
+            return { questionId: q.id, isCorrect, selected: playerState.selectedAnswers[q.id] };
+        });
+        const score = Math.round((correct / total) * 100);
+        let stars = 0;
+        if (score >= 90) stars = 3;
+        else if (score >= 70) stars = 2;
+        else if (score >= 50) stars = 1;
+        const xpEarned = stars > 0 ? 10 * stars : 0;
+        const coinsEarned = stars > 0 ? 5 * stars : 0;
+
+        // update user (simulate)
+        USER.xp += xpEarned;
+        USER.coins += coinsEarned;
+        if (USER.xp >= USER.nextLevelXp) {
+            USER.level++;
+            USER.nextLevelXp += 100;
+        }
+        // update lesson
+        const lesson = LESSONS.find(l => l.id === currentLessonId);
+        if (lesson) {
+            lesson.completed = true;
+            lesson.stars = stars;
+            // unlock next lesson in same section
+            const nextLesson = LESSONS.find(l => l.section === lesson.section && l.stage === lesson.stage + 1);
+            if (nextLesson) nextLesson.locked = false;
+        }
+
+        if (playerState.timerInterval) {
+            clearInterval(playerState.timerInterval);
+            playerState.timerInterval = null;
+        }
+
+        resultData = {
+            score,
+            stars,
+            xpEarned,
+            coinsEarned,
+            correctCount: correct,
+            totalQuestions: total,
+            questionResults: results,
+            lessonTitle: lesson ? lesson.title : 'Dars'
+        };
+
+        navigateTo('result', resultData);
+    }
+
+    // ============================================================
+    //  RESULT SCREEN
+    // ============================================================
+    function renderResult(data) {
+        const container = document.getElementById('page-result');
+        const { score, stars, xpEarned, coinsEarned, correctCount, totalQuestions, questionResults, lessonTitle } = data;
+        const starEmojis = ['📚', '✨', '⭐', '🌟'];
+        const emoji = starEmojis[stars] || '📚';
+
+        let qResultsHtml = questionResults.map((qr, i) => `
+            <div class="flex items-center gap-2 p-2 rounded ${qr.isCorrect ? 'bg-green-50' : 'bg-red-50'}">
+                <i class="fas ${qr.isCorrect ? 'fa-check text-green-500' : 'fa-times text-red-500'}"></i>
+                <span class="text-sm">Savol ${i+1}: ${qr.isCorrect ? 'To‘g‘ri' : 'Noto‘g‘ri'}</span>
+            </div>
+        `).join('');
+
+        container.innerHTML = `
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-8 result-card">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">${emoji}</div>
+                        <h2 class="text-2xl font-bold mb-2">"${lessonTitle}" yakunlandi!</h2>
+                        <div class="flex justify-center gap-2 mb-4">
+                            ${Array.from({ length: 3 }, (_, i) =>
+                                `<i class="fas fa-star text-2xl ${i < stars ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+                            ).join('')}
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <p class="text-sm text-slate-500">To‘g‘ri javoblar</p>
+                                <p class="text-xl font-bold text-blue-600">${score}%</p>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <p class="text-sm text-slate-500">XP</p>
+                                <p class="text-xl font-bold text-green-600">+${xpEarned}</p>
+                            </div>
+                            <div class="bg-yellow-50 p-3 rounded-lg">
+                                <p class="text-sm text-slate-500">Tangalar</p>
+                                <p class="text-xl font-bold text-yellow-600">+${coinsEarned}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 mb-6 text-left">
+                            ${qResultsHtml}
+                        </div>
+                        <div class="flex gap-3 justify-center flex-wrap">
+                            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" onclick="navigateTo('dashboard')">
+                                <i class="fas fa-home mr-2"></i> Dashboard
+                            </button>
+                            ${stars >= 2 ? `<button class="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-lg transition" onclick="goToNextLesson()">
+                                <i class="fas fa-arrow-right mr-2"></i> Keyingi dars
+                            </button>` : ''}
+                            <button class="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-lg transition" onclick="navigateTo('lessons')">
+                                <i class="fas fa-list mr-2"></i> Darslar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function goToNextLesson() {
+        // find next unlocked lesson in same section
+        const current = LESSONS.find(l => l.id === currentLessonId);
+        if (!current) { navigateTo('lessons'); return; }
+        const next = LESSONS.find(l => l.section === current.section && l.stage === current.stage + 1);
+        if (next && !next.locked) {
+            startLesson(next.id);
+        } else {
+            alert('Keyingi dars hali ochilmagan yoki mavjud emas.');
+            navigateTo('lessons');
+        }
+    }
+
+    // ============================================================
+    //  AUTH (demo)
+    // ============================================================
+    function openLoginModal() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    }
+    function closeLoginModal() {
+        document.getElementById('loginModal').classList.add('hidden');
+    }
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        // demo: just close and update user
+        closeLoginModal();
+        alert('✅ Tizimga kirdingiz (demo)');
+        // update UI
+        document.getElementById('userNameDisplay').textContent = 'Sarvar';
+        document.getElementById('mobileUserName').textContent = 'Sarvar';
+        navigateTo('dashboard');
+    }
+    function handleLogout() {
+        if (confirm('Chiqishni xohlaysizmi?')) {
+            alert('Siz tizimdan chiqdingiz (demo)');
+            openLoginModal();
+        }
+    }
+
+    function viewLesson(id) {
+        // just show lesson details (for completed lessons)
+        const lesson = LESSONS.find(l => l.id === id);
+        if (lesson) {
+            alert(`Dars: ${lesson.title}\nBo‘lim: ${lesson.section}\nYulduzlar: ${lesson.stars}\nHolat: ${lesson.completed ? 'Yakunlangan' : 'Davom etmoqda'}`);
+        }
+    }
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // set nav active
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            if (btn.dataset.page === 'dashboard') btn.classList.add('bg-slate-100', 'font-semibold');
+        });
+        renderDashboard();
+        // if user not logged in, show login modal after 1s (for demo)
+        // but we want to show logged-in state by default
+        // so just show dashboard
+    });
+
+    // for filter buttons - additional handling
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white');
+                b.classList.add('border', 'border-slate-200', 'bg-transparent', 'text-slate-700');
+            });
+            this.classList.remove('border', 'border-slate-200', 'bg-transparent', 'text-slate-700');
+            this.classList.add('bg-blue-600', 'text-white');
+            renderLessons(this.dataset.section);
+        });
+    });
+
+    console.log('✅ EnglishLearn to‘liq demo prototip ishga tushdi!');
+</script>
+
+<!-- Floating login button (for demo) -->
+<div class="fixed bottom-4 right-4 z-40">
+    <button onclick="openLoginModal()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-12 h-12 shadow-lg flex items-center justify-center text-xl transition">
+        <i class="fas fa-user"></i>
+    </button>
+</div>
+
+</body>
+</html>
