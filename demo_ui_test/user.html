@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnglishLearn — Toʻliq Funksional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f8fafc; }
+        .container-custom { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+        .page-section { display: none; animation: fadeIn 0.25s ease; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { 0% { opacity:0; transform:translateY(6px); } 100% { opacity:1; transform:translateY(0); } }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.07); }
+        .star-filled { color: #facc15; }
+        .star-empty { color: #d1d5db; }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #1e293b; font-weight: 600; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
+        .tab-inactive:hover { color: #1e293b; }
+        .modal-bg { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .progress-bar-animated { transition: width 0.5s ease; }
+        .lesson-locked { opacity: 0.6; filter: grayscale(0.3); pointer-events: none; }
+        .avatar-ring { border: 3px solid #e2e8f0; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        .option-btn {
+            transition: all 0.15s;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+        }
+        .option-btn:hover:not(.selected):not(.disabled) { border-color: #94a3b8; background: #f1f5f9; }
+        .option-btn.selected { border-color: #3b82f6; background: #eff6ff; }
+        .option-btn.correct { border-color: #22c55e; background: #f0fdf4; }
+        .option-btn.wrong { border-color: #ef4444; background: #fef2f2; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+        .result-card { transition: all 0.3s; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-success { background: #22c55e; }
+        .toast-error { background: #ef4444; }
+        .toast-info { background: #3b82f6; }
+    </style>
+</head>
+<body>
+
+<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60">
+    <div class="container-custom flex items-center justify-between h-16">
+        <a href="#" class="flex items-center gap-2 text-xl font-bold text-slate-800" onclick="navigateTo('dashboard')">
+            <span class="text-2xl">📚</span>
+            <span>English<span class="text-blue-600">Learn</span></span>
+        </a>
+        <nav class="hidden md:flex items-center gap-1" id="desktopNav">
+            <button onclick="navigateTo('dashboard')" class="nav-btn px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition" data-page="dashboard">Bosh sahifa</button>
+            <button onclick="navigateTo('lessons')" class="nav-btn px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition" data-page="lessons">Darslar</button>
+            <button onclick="navigateTo('leaderboard')" class="nav-btn px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition" data-page="leaderboard">Reyting</button>
+            <button onclick="navigateTo('profile')" class="nav-btn px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition" data-page="profile">Profil</button>
+            <div class="w-px h-6 bg-slate-200 mx-2"></div>
+            <div class="flex items-center gap-3" id="authButtons">
+                <span class="text-sm font-medium text-slate-700 hidden" id="userNameDisplay">Sarvar</span>
+                <button onclick="handleLogout()" class="text-sm text-red-500 hover:text-red-700 transition hidden" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+                <button onclick="openLoginModal()" class="text-sm text-blue-600 hover:text-blue-800 transition" id="loginNavBtn">Kirish</button>
+                <button onclick="openRegisterModal()" class="text-sm bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700 transition" id="registerNavBtn">Ro'yxatdan o'tish</button>
+            </div>
+        </nav>
+        <button id="mobileMenuBtn" class="md:hidden text-slate-700 text-xl" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+    </div>
+    <div id="mobileMenu" class="md:hidden hidden border-t border-slate-200 bg-white px-4 py-3 space-y-2">
+        <button onclick="navigateTo('dashboard'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100">Bosh sahifa</button>
+        <button onclick="navigateTo('lessons'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100">Darslar</button>
+        <button onclick="navigateTo('leaderboard'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100">Reyting</button>
+        <button onclick="navigateTo('profile'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100">Profil</button>
+        <hr class="my-2" />
+        <div class="flex items-center justify-between px-3 py-2" id="mobileAuthButtons">
+            <span class="text-sm font-medium hidden" id="mobileUserName">Sarvar</span>
+            <button onclick="handleLogout()" class="text-red-500 hidden" id="mobileLogoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+            <button onclick="openLoginModal(); toggleMobileMenu();" class="text-blue-600" id="mobileLoginBtn">Kirish</button>
+            <button onclick="openRegisterModal(); toggleMobileMenu();" class="bg-blue-600 text-white px-3 py-1 rounded-lg" id="mobileRegisterBtn">Ro'yxat</button>
+        </div>
+    </div>
+</header>
+
+<main class="container-custom py-6">
+
+    <section id="page-dashboard" class="page-section active">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">👋 Salom, <span id="dashUserName">Mehmon</span></h1>
+                <p class="text-slate-500">Bugungi o‘quv rejangizni davom eting</p>
+            </div>
+            <div class="flex gap-2 mt-3 sm:mt-0">
+                <button class="px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition flex items-center gap-2" onclick="resetDailyGoal()"><i class="far fa-calendar-alt"></i> Kunlik maqsad</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-slate-500">Daraja</p><p class="text-2xl font-bold text-slate-800" id="dashLevel">1</p></div>
+                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-trophy"></i></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-slate-500">XP</p><p class="text-2xl font-bold text-slate-800" id="dashXp">0</p></div>
+                    <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-bolt"></i></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-slate-500">Streak</p><p class="text-2xl font-bold text-slate-800" id="dashStreak">0 🔥</p></div>
+                    <div class="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600"><i class="fas fa-fire"></i></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div><p class="text-sm text-slate-500">Tangalar</p><p class="text-2xl font-bold text-slate-800" id="dashCoins">🪙 0</p></div>
+                    <div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600"><i class="fas fa-coins"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-slate-100 mb-6">
+            <div class="flex justify-between text-sm mb-1">
+                <span class="text-slate-600">XP progress</span>
+                <span class="text-slate-600" id="xpProgressText">0 / 100</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5">
+                <div id="xpProgressBar" class="bg-blue-600 h-2.5 rounded-full progress-bar-animated" style="width: 0%;"></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-1" id="xpRemaining">Keyingi daraja uchun 100 XP qoldi</p>
+        </div>
+
+        <h2 class="text-lg font-semibold text-slate-800 mb-3">📚 Bo‘limlar</h2>
+        <div class="grid md:grid-cols-3 gap-5 mb-8" id="sectionsContainer"></div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+            <h3 class="font-semibold text-slate-800 mb-3">📊 So‘nggi faoliyat</h3>
+            <div id="recentActivity" class="space-y-3"></div>
+        </div>
+    </section>
+
+    <section id="page-lessons" class="page-section">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <h2 class="text-2xl font-bold text-slate-800">📖 Barcha darslar</h2>
+            <div class="flex gap-2 mt-2 sm:mt-0 flex-wrap" id="sectionFilter">
+                <button class="filter-btn px-4 py-2 text-sm bg-blue-600 text-white rounded-lg" data-section="all">Hammasi</button>
+                <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="BEGINNER">Beginner</button>
+                <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="ELEMENTARY">Elementary</button>
+                <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="IELTS">IELTS</button>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600 border-b">
+                    <tr>
+                        <th class="px-5 py-3 text-left font-medium">Dars</th>
+                        <th class="px-5 py-3 text-left font-medium">Bo‘lim</th>
+                        <th class="px-5 py-3 text-left font-medium">Holat</th>
+                        <th class="px-5 py-3 text-left font-medium">Yulduzlar</th>
+                        <th class="px-5 py-3 text-left font-medium"></th>
+                    </tr>
+                </thead>
+                <tbody id="lessonsTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="page-leaderboard" class="page-section">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">🏆 Reyting</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+            <div class="flex gap-4 mb-4 flex-wrap">
+                <button class="leaderboard-filter px-4 py-2 text-sm bg-blue-600 text-white rounded-lg" data-period="weekly">Haftalik</button>
+                <button class="leaderboard-filter px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-period="monthly">Oylik</button>
+                <button class="leaderboard-filter px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-period="global">Global</button>
+            </div>
+            <div id="leaderboardList" class="space-y-3"></div>
+        </div>
+    </section>
+
+    <section id="page-profile" class="page-section">
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 text-center">
+                    <div class="relative inline-block">
+                        <div class="w-28 h-28 rounded-full bg-blue-100 flex items-center justify-center text-4xl text-blue-600 mx-auto avatar-ring"><i class="fas fa-user"></i></div>
+                        <span class="absolute bottom-1 right-1 bg-green-500 border-2 border-white rounded-full w-4 h-4"></span>
+                    </div>
+                    <h3 class="mt-3 text-xl font-bold text-slate-800" id="profileName">Mehmon</h3>
+                    <p class="text-sm text-slate-500" id="profileEmail">mehmon@email.com</p>
+                    <div class="mt-4 flex justify-center gap-2">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full" id="profileLevel">Daraja 1</span>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full" id="profileStatus">FREE</span>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="text-left space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-500">Umumiy XP</span><span class="font-medium" id="profileXp">0</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Tangalar</span><span class="font-medium" id="profileCoins">0</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Streak</span><span class="font-medium" id="profileStreak">0 kun</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Yakunlangan darslar</span><span class="font-medium" id="profileCompleted">0</span></div>
+                    </div>
+                    <button class="mt-4 w-full py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition text-sm" onclick="resetProgress()">Progressni tiklash</button>
+                </div>
+            </div>
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                    <h4 class="font-semibold text-slate-800 mb-4">📈 Statistika</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">O‘rtacha ball</p><p class="text-2xl font-bold text-slate-800" id="profileAvgScore">0%</p></div>
+                        <div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Eng yaxshi natija</p><p class="text-2xl font-bold text-slate-800" id="profileBestStars">0⭐</p></div>
+                        <div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Jami vaqt</p><p class="text-2xl font-bold text-slate-800" id="profileTotalTime">0 min</p></div>
+                        <div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Yutuqlar</p><p class="text-2xl font-bold text-slate-800" id="profileAchievements">0</p></div>
+                    </div>
+                    <div class="mt-6">
+                        <h5 class="font-medium text-slate-700 mb-2">Zaif tomonlar</h5>
+                        <div class="flex flex-wrap gap-2" id="weakPoints">
+                            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">Hali ma'lumot yo'q</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-player" class="page-section"></section>
+    <section id="page-result" class="page-section"></section>
+
+</main>
+
+<div id="loginModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-[fadeIn_0.2s_ease]">
+        <button onclick="closeLoginModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fas fa-times"></i></button>
+        <div class="text-center mb-5">
+            <span class="text-3xl">📚</span>
+            <h2 class="text-2xl font-bold text-slate-800 mt-1">Kirish</h2>
+            <p class="text-sm text-slate-500">Hisobingizga kiring</p>
+        </div>
+        <form onsubmit="event.preventDefault(); handleLogin();">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input type="email" id="loginEmail" class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="email@example.com" required />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Parol</label>
+                <input type="password" id="loginPassword" class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" required minlength="4" />
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Kirish</button>
+        </form>
+        <p class="text-center text-sm text-slate-500 mt-4">
+            Hisobingiz yo‘qmi? <a href="#" class="text-blue-600 hover:underline" onclick="event.preventDefault(); closeLoginModal(); openRegisterModal();">Ro‘yxatdan o‘tish</a>
+        </p>
+    </div>
+</div>
+
+<div id="registerModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-[fadeIn_0.2s_ease]">
+        <button onclick="closeRegisterModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fas fa-times"></i></button>
+        <div class="text-center mb-5">
+            <span class="text-3xl">📚</span>
+            <h2 class="text-2xl font-bold text-slate-800 mt-1">Ro'yxatdan o'tish</h2>
+            <p class="text-sm text-slate-500">Yangi hisob yarating</p>
+        </div>
+        <form onsubmit="event.preventDefault(); handleRegister();">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Ism</label>
+                <input type="text" id="registerName" class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ismingiz" required />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input type="email" id="registerEmail" class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="email@example.com" required />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Parol</label>
+                <input type="password" id="registerPassword" class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••" required minlength="4" />
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Ro'yxatdan o'tish</button>
+        </form>
+        <p class="text-center text-sm text-slate-500 mt-4">
+            Hisobingiz bormi? <a href="#" class="text-blue-600 hover:underline" onclick="event.preventDefault(); closeRegisterModal(); openLoginModal();">Kirish</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    //  DATA
+    // ============================================================
+    const SECTIONS = [
+        { id: 'BEGINNER', label: 'Beginner', icon: '📖', color: 'blue' },
+        { id: 'ELEMENTARY', label: 'Elementary', icon: '🌟', color: 'green' },
+        { id: 'IELTS', label: 'IELTS', icon: '🎯', color: 'purple' }
+    ];
+
+    const ALL_LESSONS = [
+        { id: 'l1', title: 'Greetings', section: 'BEGINNER', stage: 1, isFree: true },
+        { id: 'l2', title: 'Family', section: 'BEGINNER', stage: 2, isFree: true },
+        { id: 'l3', title: 'Daily Routine', section: 'BEGINNER', stage: 3, isFree: false },
+        { id: 'l4', title: 'Food', section: 'BEGINNER', stage: 4, isFree: false },
+        { id: 'l5', title: 'Shopping', section: 'BEGINNER', stage: 5, isFree: false },
+        { id: 'e1', title: 'Numbers', section: 'ELEMENTARY', stage: 1, isFree: true },
+        { id: 'e2', title: 'Time', section: 'ELEMENTARY', stage: 2, isFree: true },
+        { id: 'e3', title: 'Weather', section: 'ELEMENTARY', stage: 3, isFree: false },
+        { id: 'i1', title: 'IELTS Intro', section: 'IELTS', stage: 1, isFree: false },
+        { id: 'i2', title: 'IELTS Listening', section: 'IELTS', stage: 2, isFree: false }
+    ];
+
+    const LESSON_QUESTIONS = {
+        'l1': [
+            { id: 'q1', text: 'What is the correct greeting in the morning?', options: ['Good morning', 'Good afternoon', 'Good evening', 'Good night'], correct: 'Good morning' },
+            { id: 'q2', text: 'How do you say "hello" formally?', options: ['Hi', 'Hey', 'Good day', 'Hello'], correct: 'Hello' }
+        ],
+        'l2': [
+            { id: 'q1', text: 'What is the father of your father called?', options: ['Uncle', 'Grandfather', 'Brother', 'Cousin'], correct: 'Grandfather' },
+            { id: 'q2', text: 'Your mother\'s sister is your ...', options: ['Aunt', 'Uncle', 'Cousin', 'Grandmother'], correct: 'Aunt' },
+            { id: 'q3', text: 'How many people are in a nuclear family?', options: ['2-4', '5-7', '8-10', '10+'], correct: '2-4' },
+            { id: 'q4', text: 'Your brother\'s son is your ...', options: ['Nephew', 'Cousin', 'Uncle', 'Grandson'], correct: 'Nephew' }
+        ],
+        'l3': [
+            { id: 'q1', text: 'What time do people usually wake up?', options: ['6-8 AM', '10-12 AM', '2-4 PM', '8-10 PM'], correct: '6-8 AM' },
+            { id: 'q2', text: 'What do you do after waking up?', options: ['Sleep', 'Eat lunch', 'Brush teeth', 'Watch TV'], correct: 'Brush teeth' },
+            { id: 'q3', text: 'What is a typical breakfast food?', options: ['Pizza', 'Cereal', 'Soup', 'Pasta'], correct: 'Cereal' }
+        ],
+        'l4': [
+            { id: 'q1', text: 'Which is a fruit?', options: ['Carrot', 'Apple', 'Potato', 'Onion'], correct: 'Apple' },
+            { id: 'q2', text: 'What is a typical drink for breakfast?', options: ['Juice', 'Soda', 'Beer', 'Coffee'], correct: 'Juice' }
+        ],
+        'l5': [
+            { id: 'q1', text: 'Where do you buy groceries?', options: ['Supermarket', 'Restaurant', 'Hotel', 'School'], correct: 'Supermarket' },
+            { id: 'q2', text: 'What do you use to pay?', options: ['Book', 'Money', 'Pen', 'Phone'], correct: 'Money' }
+        ],
+        'e1': [
+            { id: 'q1', text: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: '4' },
+            { id: 'q2', text: 'What number comes after 9?', options: ['8', '9', '10', '11'], correct: '10' },
+            { id: 'q3', text: 'How many zeros in one hundred?', options: ['1', '2', '3', '4'], correct: '2' }
+        ],
+        'e2': [
+            { id: 'q1', text: 'How many minutes in an hour?', options: ['30', '45', '60', '90'], correct: '60' },
+            { id: 'q2', text: 'What time is 12:00 PM?', options: ['Midnight', 'Noon', 'Morning', 'Evening'], correct: 'Noon' }
+        ],
+        'e3': [
+            { id: 'q1', text: 'What is the weather like when it rains?', options: ['Sunny', 'Rainy', 'Snowy', 'Windy'], correct: 'Rainy' },
+            { id: 'q2', text: 'What do you wear in winter?', options: ['T-shirt', 'Jacket', 'Shorts', 'Swimsuit'], correct: 'Jacket' }
+        ],
+        'i1': [
+            { id: 'q1', text: 'What does IELTS stand for?', options: ['International English Language Test', 'International English Language Testing System', 'International Education Language Test', 'English Language Test System'], correct: 'International English Language Testing System' },
+            { id: 'q2', text: 'How many sections are in IELTS?', options: ['2', '3', '4', '5'], correct: '4' }
+        ],
+        'i2': [
+            { id: 'q1', text: 'What skill is tested in IELTS Listening?', options: ['Reading', 'Writing', 'Speaking', 'Listening'], correct: 'Listening' },
+            { id: 'q2', text: 'How long is IELTS Listening section?', options: ['20 min', '30 min', '40 min', '60 min'], correct: '30 min' }
+        ]
+    };
+
+    const DEFAULT_QUESTIONS = [
+        { id: 'q1', text: 'What is the capital of Uzbekistan?', options: ['Tashkent', 'Samarkand', 'Bukhara', 'Andijan'], correct: 'Tashkent' },
+        { id: 'q2', text: 'What language do Uzbeks speak?', options: ['Russian', 'Uzbek', 'English', 'Turkish'], correct: 'Uzbek' }
+    ];
+
+    // ============================================================
+    //  STATE
+    // ============================================================
+    let currentUser = null;
+    let currentPage = 'dashboard';
+    let currentLessonId = null;
+    let playerState = {
+        currentQuestion: 0,
+        selectedAnswers: {},
+        timeSpent: 0,
+        timerInterval: null,
+        questions: [],
+        lessonData: null,
+        isSubmitted: false
+    };
+    let resultData = null;
+    let leaderboardData = [];
+
+    // ============================================================
+    //  LOCAL STORAGE
+    // ============================================================
+    function loadData() {
+        try {
+            const saved = localStorage.getItem('englishlearn_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.users) {
+                    // Update leaderboard from users
+                    leaderboardData = Object.values(data.users).map(u => ({
+                        name: u.name,
+                        email: u.email,
+                        xp: u.xp || 0,
+                        rank: 0,
+                        badge: ''
+                    }));
+                    // Sort by XP
+                    leaderboardData.sort((a, b) => b.xp - a.xp);
+                    leaderboardData.forEach((u, i) => {
+                        u.rank = i + 1;
+                        if (i === 0) u.badge = '🏅';
+                        else if (i === 1) u.badge = '🥈';
+                        else if (i === 2) u.badge = '🥉';
+                    });
+                    // Check if current user exists in leaderboard
+                    if (currentUser) {
+                        const userInLB = leaderboardData.find(u => u.email === currentUser.email);
+                        if (!userInLB) {
+                            leaderboardData.push({
+                                name: currentUser.name,
+                                email: currentUser.email,
+                                xp: currentUser.xp || 0,
+                                rank: leaderboardData.length + 1,
+                                badge: '⭐'
+                            });
+                            leaderboardData.sort((a, b) => b.xp - a.xp);
+                            leaderboardData.forEach((u, i) => {
+                                u.rank = i + 1;
+                                if (i === 0) u.badge = '🏅';
+                                else if (i === 1) u.badge = '🥈';
+                                else if (i === 2) u.badge = '🥉';
+                            });
+                        }
+                    }
+                }
+                return data;
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    function saveData() {
+        try {
+            const data = {
+                users: {}
+            };
+            // Save all users from leaderboard
+            leaderboardData.forEach(u => {
+                data.users[u.email] = {
+                    name: u.name,
+                    email: u.email,
+                    xp: u.xp || 0,
+                    coins: u.coins || 0,
+                    streak: u.streak || 0,
+                    level: u.level || 1,
+                    completedLessons: u.completedLessons || 0,
+                    totalTime: u.totalTime || 0,
+                    bestStars: u.bestStars || 0,
+                    avgScore: u.avgScore || 0,
+                    achievements: u.achievements || 0,
+                    weakPoints: u.weakPoints || []
+                };
+            });
+            // Add current user if exists
+            if (currentUser) {
+                const existing = data.users[currentUser.email] || {};
+                data.users[currentUser.email] = {
+                    name: currentUser.name,
+                    email: currentUser.email,
+                    xp: currentUser.xp || existing.xp || 0,
+                    coins: currentUser.coins || existing.coins || 0,
+                    streak: currentUser.streak || existing.streak || 0,
+                    level: currentUser.level || existing.level || 1,
+                    completedLessons: currentUser.completedLessons || existing.completedLessons || 0,
+                    totalTime: currentUser.totalTime || existing.totalTime || 0,
+                    bestStars: currentUser.bestStars || existing.bestStars || 0,
+                    avgScore: currentUser.avgScore || existing.avgScore || 0,
+                    achievements: currentUser.achievements || existing.achievements || 0,
+                    weakPoints: currentUser.weakPoints || existing.weakPoints || []
+                };
+            }
+            // Save lesson progress
+            data.lessonProgress = {};
+            ALL_LESSONS.forEach(l => {
+                data.lessonProgress[l.id] = {
+                    completed: l.completed || false,
+                    stars: l.stars || 0,
+                    locked: l.locked || false
+                };
+            });
+            localStorage.setItem('englishlearn_data', JSON.stringify(data));
+        } catch (e) {}
+    }
+
+    function loadUser(email) {
+        const data = loadData();
+        if (data && data.users && data.users[email]) {
+            const userData = data.users[email];
+            currentUser = {
+                name: userData.name,
+                email: userData.email,
+                xp: userData.xp || 0,
+                coins: userData.coins || 0,
+                streak: userData.streak || 0,
+                level: userData.level || 1,
+                completedLessons: userData.completedLessons || 0,
+                totalTime: userData.totalTime || 0,
+                bestStars: userData.bestStars || 0,
+                avgScore: userData.avgScore || 0,
+                achievements: userData.achievements || 0,
+                weakPoints: userData.weakPoints || []
+            };
+            // Load lesson progress
+            if (data.lessonProgress) {
+                ALL_LESSONS.forEach(l => {
+                    const progress = data.lessonProgress[l.id];
+                    if (progress) {
+                        l.completed = progress.completed || false;
+                        l.stars = progress.stars || 0;
+                        l.locked = progress.locked || false;
+                    }
+                });
+            }
+            updateUI();
+            return true;
+        }
+        return false;
+    }
+
+    function saveUser() {
+        if (!currentUser) return;
+        const data = loadData() || { users: {} };
+        data.users[currentUser.email] = {
+            name: currentUser.name,
+            email: currentUser.email,
+            xp: currentUser.xp || 0,
+            coins: currentUser.coins || 0,
+            streak: currentUser.streak || 0,
+            level: currentUser.level || 1,
+            completedLessons: currentUser.completedLessons || 0,
+            totalTime: currentUser.totalTime || 0,
+            bestStars: currentUser.bestStars || 0,
+            avgScore: currentUser.avgScore || 0,
+            achievements: currentUser.achievements || 0,
+            weakPoints: currentUser.weakPoints || []
+        };
+        // Update leaderboard
+        const lbIndex = leaderboardData.findIndex(u => u.email === currentUser.email);
+        if (lbIndex >= 0) {
+            leaderboardData[lbIndex].xp = currentUser.xp;
+            leaderboardData[lbIndex].name = currentUser.name;
+        } else {
+            leaderboardData.push({
+                name: currentUser.name,
+                email: currentUser.email,
+                xp: currentUser.xp,
+                rank: leaderboardData.length + 1,
+                badge: ''
+            });
+        }
+        leaderboardData.sort((a, b) => b.xp - a.xp);
+        leaderboardData.forEach((u, i) => {
+            u.rank = i + 1;
+            if (i === 0) u.badge = '🏅';
+            else if (i === 1) u.badge = '🥈';
+            else if (i === 2) u.badge = '🥉';
+        });
+        // Save lesson progress
+        data.lessonProgress = {};
+        ALL_LESSONS.forEach(l => {
+            data.lessonProgress[l.id] = {
+                completed: l.completed || false,
+                stars: l.stars || 0,
+                locked: l.locked || false
+            };
+        });
+        localStorage.setItem('englishlearn_data', JSON.stringify(data));
+    }
+
+    // ============================================================
+    //  AUTH
+    // ============================================================
+    function openLoginModal() {
+        document.getElementById('loginModal').classList.remove('hidden');
+        document.getElementById('registerModal').classList.add('hidden');
+    }
+
+    function closeLoginModal() {
+        document.getElementById('loginModal').classList.add('hidden');
+    }
+
+    function openRegisterModal() {
+        document.getElementById('registerModal').classList.remove('hidden');
+        document.getElementById('loginModal').classList.add('hidden');
+    }
+
+    function closeRegisterModal() {
+        document.getElementById('registerModal').classList.add('hidden');
+    }
+
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        if (!email || !password) {
+            showToast('Iltimos, barcha maydonlarni to\'ldiring', 'error');
+            return;
+        }
+        const data = loadData();
+        if (!data || !data.users || !data.users[email]) {
+            showToast('Bunday foydalanuvchi topilmadi', 'error');
+            return;
+        }
+        if (password.length < 4) {
+            showToast('Parol 4 ta belgidan kam bo\'lmasligi kerak', 'error');
+            return;
+        }
+        loadUser(email);
+        closeLoginModal();
+        showToast('✅ Tizimga muvaffaqiyatli kirdingiz!', 'success');
+        navigateTo('dashboard');
+        updateUI();
+    }
+
+    function handleRegister() {
+        const name = document.getElementById('registerName').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value.trim();
+        if (!name || !email || !password) {
+            showToast('Iltimos, barcha maydonlarni to\'ldiring', 'error');
+            return;
+        }
+        if (password.length < 4) {
+            showToast('Parol 4 ta belgidan kam bo\'lmasligi kerak', 'error');
+            return;
+        }
+        const data = loadData() || { users: {} };
+        if (data.users && data.users[email]) {
+            showToast('Bu email allaqachon ro\'yxatdan o\'tgan', 'error');
+            return;
+        }
+        // Create user
+        data.users[email] = {
+            name: name,
+            email: email,
+            xp: 0,
+            coins: 10,
+            streak: 0,
+            level: 1,
+            completedLessons: 0,
+            totalTime: 0,
+            bestStars: 0,
+            avgScore: 0,
+            achievements: 0,
+            weakPoints: []
+        };
+        localStorage.setItem('englishlearn_data', JSON.stringify(data));
+        // Reset lessons
+        ALL_LESSONS.forEach(l => {
+            l.completed = false;
+            l.stars = 0;
+            l.locked = l.stage > 1;
+        });
+        ALL_LESSONS[0].locked = false;
+        loadUser(email);
+        closeRegisterModal();
+        showToast('✅ Ro\'yxatdan muvaffaqiyatli o\'tdingiz!', 'success');
+        navigateTo('dashboard');
+        updateUI();
+    }
+
+    function handleLogout() {
+        if (!confirm('Chiqishni xohlaysizmi?')) return;
+        currentUser = null;
+        ALL_LESSONS.forEach(l => {
+            l.completed = false;
+            l.stars = 0;
+            l.locked = l.stage > 1;
+        });
+        ALL_LESSONS[0].locked = false;
+        updateUI();
+        showToast('Tizimdan chiqdingiz', 'info');
+        navigateTo('dashboard');
+        openLoginModal();
+    }
+
+    // ============================================================
+    //  TOAST
+    // ============================================================
+    function showToast(message, type = 'info') {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 3000);
+    }
+
+    // ============================================================
+    //  NAVIGATION
+    // ============================================================
+    function navigateTo(page, data = null) {
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('page-' + page);
+        if (target) target.classList.add('active');
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('bg-slate-100', 'font-semibold');
+            if (btn.dataset.page === page) btn.classList.add('bg-slate-100', 'font-semibold');
+        });
+
+        currentPage = page;
+
+        if (page !== 'player' && playerState.timerInterval) {
+            clearInterval(playerState.timerInterval);
+            playerState.timerInterval = null;
+        }
+
+        if (page === 'dashboard') renderDashboard();
+        else if (page === 'lessons') renderLessons('all');
+        else if (page === 'leaderboard') renderLeaderboard();
+        else if (page === 'profile') renderProfile();
+        else if (page === 'player' && data) renderPlayer(data);
+        else if (page === 'result' && data) renderResult(data);
+
+        if (page !== 'login' && page !== 'register') {
+            closeLoginModal();
+            closeRegisterModal();
+        }
+    }
+
+    function toggleMobileMenu() {
+        document.getElementById('mobileMenu').classList.toggle('hidden');
+    }
+
+    // ============================================================
+    //  UPDATE UI
+    // ============================================================
+    function updateUI() {
+        const isLoggedIn = !!currentUser;
+        const name = currentUser ? currentUser.name : 'Mehmon';
+
+        // Desktop
+        document.getElementById('userNameDisplay').textContent = name;
+        document.getElementById('userNameDisplay').classList.toggle('hidden', !isLoggedIn);
+        document.getElementById('logoutBtn').classList.toggle('hidden', !isLoggedIn);
+        document.getElementById('loginNavBtn').classList.toggle('hidden', isLoggedIn);
+        document.getElementById('registerNavBtn').classList.toggle('hidden', isLoggedIn);
+
+        // Mobile
+        document.getElementById('mobileUserName').textContent = name;
+        document.getElementById('mobileUserName').classList.toggle('hidden', !isLoggedIn);
+        document.getElementById('mobileLogoutBtn').classList.toggle('hidden', !isLoggedIn);
+        document.getElementById('mobileLoginBtn').classList.toggle('hidden', isLoggedIn);
+        document.getElementById('mobileRegisterBtn').classList.toggle('hidden', isLoggedIn);
+
+        if (isLoggedIn) {
+            renderDashboard();
+            renderLessons(document.querySelector('.filter-btn.active')?.dataset?.section || 'all');
+        } else {
+            // Reset dashboard to guest view
+            document.getElementById('dashUserName').textContent = 'Mehmon';
+            document.getElementById('dashLevel').textContent = '1';
+            document.getElementById('dashXp').textContent = '0';
+            document.getElementById('dashStreak').textContent = '0 🔥';
+            document.getElementById('dashCoins').textContent = '🪙 0';
+            document.getElementById('xpProgressText').textContent = '0 / 100';
+            document.getElementById('xpProgressBar').style.width = '0%';
+            document.getElementById('xpRemaining').textContent = 'Keyingi daraja uchun 100 XP qoldi';
+        }
+    }
+
+    // ============================================================
+    //  RENDER FUNCTIONS
+    // ============================================================
+    function renderDashboard() {
+        if (!currentUser) {
+            document.getElementById('dashUserName').textContent = 'Mehmon';
+            return;
+        }
+        document.getElementById('dashUserName').textContent = currentUser.name;
+        document.getElementById('dashLevel').textContent = currentUser.level || 1;
+        document.getElementById('dashXp').textContent = currentUser.xp || 0;
+        document.getElementById('dashStreak').textContent = (currentUser.streak || 0) + ' 🔥';
+        document.getElementById('dashCoins').textContent = '🪙 ' + (currentUser.coins || 0);
+
+        const nextLevelXp = (currentUser.level || 1) * 100;
+        document.getElementById('xpProgressText').textContent = (currentUser.xp || 0) + ' / ' + nextLevelXp;
+        const pct = Math.min(100, ((currentUser.xp || 0) / nextLevelXp) * 100);
+        document.getElementById('xpProgressBar').style.width = pct + '%';
+        document.getElementById('xpRemaining').textContent = 'Keyingi daraja uchun ' + (nextLevelXp - (currentUser.xp || 0)) + ' XP qoldi';
+
+        // Sections
+        const container = document.getElementById('sectionsContainer');
+        container.innerHTML = '';
+        SECTIONS.forEach(sec => {
+            const lessons = ALL_LESSONS.filter(l => l.section === sec.id);
+            const completed = lessons.filter(l => l.completed).length;
+            const stars = lessons.filter(l => l.completed).reduce((sum, l) => sum + (l.stars || 0), 0);
+            const avgStars = completed > 0 ? (stars / completed).toFixed(1) : '-';
+            const allLocked = lessons.every(l => l.locked);
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-sm border border-slate-100 p-5 card-hover' + (allLocked ? ' opacity-60' : '');
+            card.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div><h3 class="font-bold text-slate-800">${sec.icon} ${sec.label}</h3><p class="text-sm text-slate-500">${lessons.length} ta dars</p></div>
+                    <span class="text-xs ${allLocked ? 'bg-slate-200 text-slate-600' : 'bg-blue-50 text-blue-700'} px-2 py-0.5 rounded-full">${allLocked ? '🔒 Yopiq' : avgStars + '⭐'}</span>
+                </div>
+                <div class="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                    <span>${completed}/${lessons.length} yakunlangan</span>
+                    ${completed > 0 ? `<span class="text-blue-500">•</span><span>${avgStars} yulduz</span>` : ''}
+                </div>
+                <button class="mt-4 w-full py-2 ${allLocked ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'} rounded-lg text-sm font-medium transition flex items-center justify-center gap-2" 
+                        ${allLocked ? 'disabled' : `onclick="navigateTo('lessons'); setTimeout(() => filterLessons('${sec.id}'), 100);"`}>
+                    <i class="fas ${allLocked ? 'fa-lock' : 'fa-play'}"></i> ${allLocked ? 'Yopiq' : 'Davom etish'}
+                </button>
+            `;
+            container.appendChild(card);
+        });
+
+        // Recent activity
+        const actContainer = document.getElementById('recentActivity');
+        actContainer.innerHTML = '';
+        const recent = ALL_LESSONS.filter(l => l.completed).sort((a, b) => b.stars - a.stars).slice(0, 5);
+        if (recent.length === 0) {
+            actContainer.innerHTML = '<p class="text-slate-400 text-center py-4">Hali hech qanday dars yakunlanmagan</p>';
+        } else {
+            recent.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-slate-50 rounded-lg';
+                const starsHtml = Array.from({ length: 3 }, (_, i) =>
+                    `<i class="fas fa-star ${i < (item.stars || 0) ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+                ).join('');
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="flex">${starsHtml}</div>
+                        <span class="font-medium text-slate-700">${item.title}</span>
+                    </div>
+                    <span class="text-sm text-slate-400">${item.section}</span>
+                `;
+                actContainer.appendChild(div);
+            });
+        }
+    }
+
+    function renderLessons(filter = 'all') {
+        const tbody = document.getElementById('lessonsTableBody');
+        tbody.innerHTML = '';
+        let filtered = ALL_LESSONS;
+        if (filter !== 'all') filtered = ALL_LESSONS.filter(l => l.section === filter);
+        filtered.sort((a, b) => a.section.localeCompare(b.section) || a.stage - b.stage);
+        filtered.forEach(lesson => {
+            const tr = document.createElement('tr');
+            tr.className = 'border-b hover:bg-slate-50 transition' + (lesson.locked ? ' opacity-60' : '');
+            const statusText = lesson.completed ? 'Yakunlangan' : (lesson.locked ? 'Yopiq' : 'Davom etmoqda');
+            const statusIcon = lesson.completed ? 'fa-check-circle text-green-600' : (lesson.locked ? 'fa-lock text-slate-400' : 'fa-clock text-yellow-600');
+            const starsHtml = Array.from({ length: 3 }, (_, i) =>
+                `<i class="fas fa-star ${i < (lesson.stars || 0) ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+            ).join('');
+            const actionBtn = lesson.completed ?
+                `<button class="text-blue-600 hover:underline text-sm" onclick="viewLesson('${lesson.id}')">Ko‘rish</button>` :
+                (lesson.locked ? `<span class="text-slate-400 text-sm">2+ yulduz kerak</span>` :
+                `<button class="text-blue-600 hover:underline text-sm" onclick="startLesson('${lesson.id}')">Davom etish</button>`);
+            tr.innerHTML = `
+                <td class="px-5 py-3 font-medium text-slate-700">${lesson.title}</td>
+                <td class="px-5 py-3 text-slate-500">${lesson.section}</td>
+                <td class="px-5 py-3"><span class="inline-flex items-center gap-1 ${lesson.completed ? 'text-green-600' : (lesson.locked ? 'text-slate-400' : 'text-yellow-600')}"><i class="fas ${statusIcon}"></i> ${statusText}</span></td>
+                <td class="px-5 py-3"><div class="flex">${starsHtml}</div></td>
+                <td class="px-5 py-3">${actionBtn}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterLessons(section) {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('border', 'border-slate-200', 'bg-transparent', 'text-slate-700');
+            if (btn.dataset.section === section) {
+                btn.classList.remove('border', 'border-slate-200', 'bg-transparent', 'text-slate-700');
+                btn.classList.add('bg-blue-600', 'text-white');
+            }
+        });
+        renderLessons(section);
+    }
+
+    function renderLeaderboard() {
+        const container = document.getElementById('leaderboardList');
+        container.innerHTML = '';
+        if (leaderboardData.length === 0) {
+            container.innerHTML = '<p class="text-slate-400 text-center py-4">Hali reyting ma\'lumotlari mavjud emas</p>';
+            return;
+        }
+        leaderboardData.forEach((item, idx) => {
+            const isUser = currentUser && item.email === currentUser.email;
+            const div = document.createElement('div');
+            div.className = `flex items-center gap-4 p-3 rounded-lg ${isUser ? 'bg-blue-50 border border-blue-200' : 'bg-slate-50'}`;
+            div.innerHTML = `
+                <span class="font-bold ${idx === 0 ? 'text-blue-600' : 'text-slate-400'} w-6">${item.rank}</span>
+                ${item.badge ? `<span class="text-xl">${item.badge}</span>` : ''}
+                <span class="font-medium flex-1">${item.name} ${isUser ? '(siz)' : ''}</span>
+                <span class="text-sm text-slate-500">${item.xp || 0} XP</span>
+                ${isUser ? `<span class="text-xs bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full">Siz</span>` : ''}
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function renderProfile() {
+        if (!currentUser) {
+            document.getElementById('profileName').textContent = 'Mehmon';
+            document.getElementById('profileEmail').textContent = 'mehmon@email.com';
+            document.getElementById('profileLevel').textContent = 'Daraja 1';
+            document.getElementById('profileStatus').textContent = 'FREE';
+            document.getElementById('profileXp').textContent = '0';
+            document.getElementById('profileCoins').textContent = '0';
+            document.getElementById('profileStreak').textContent = '0 kun';
+            document.getElementById('profileCompleted').textContent = '0';
+            document.getElementById('profileAvgScore').textContent = '0%';
+            document.getElementById('profileBestStars').textContent = '0⭐';
+            document.getElementById('profileTotalTime').textContent = '0 min';
+            document.getElementById('profileAchievements').textContent = '0';
+            document.getElementById('weakPoints').innerHTML = '<span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">Hali ma\'lumot yo\'q</span>';
+            return;
+        }
+        document.getElementById('profileName').textContent = currentUser.name;
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        document.getElementById('profileLevel').textContent = 'Daraja ' + (currentUser.level || 1);
+        document.getElementById('profileStatus').textContent = currentUser.coins > 50 ? 'PREMIUM' : 'FREE';
+        document.getElementById('profileXp').textContent = currentUser.xp || 0;
+        document.getElementById('profileCoins').textContent = currentUser.coins || 0;
+        document.getElementById('profileStreak').textContent = (currentUser.streak || 0) + ' kun';
+        document.getElementById('profileCompleted').textContent = ALL_LESSONS.filter(l => l.completed).length;
+        document.getElementById('profileAvgScore').textContent = (currentUser.avgScore || 0) + '%';
+        document.getElementById('profileBestStars').textContent = (currentUser.bestStars || 0) + '⭐';
+        document.getElementById('profileTotalTime').textContent = (currentUser.totalTime || 0) + ' min';
+        document.getElementById('profileAchievements').textContent = currentUser.achievements || 0;
+
+        const weakContainer = document.getElementById('weakPoints');
+        weakContainer.innerHTML = '';
+        const weak = currentUser.weakPoints || ['Listening', 'Vocabulary'];
+        if (weak.length === 0) {
+            weakContainer.innerHTML = '<span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">Hali ma\'lumot yo\'q</span>';
+        } else {
+            weak.forEach(w => {
+                const span = document.createElement('span');
+                span.className = 'px-3 py-1 bg-red-100 text-red-700 text-xs rounded-full';
+                span.textContent = w;
+                weakContainer.appendChild(span);
+            });
+        }
+    }
+
+    // ============================================================
+    //  LESSON PLAYER
+    // ============================================================
+    function getLessonQuestions(lessonId) {
+        return LESSON_QUESTIONS[lessonId] || DEFAULT_QUESTIONS;
+    }
+
+    function startLesson(lessonId) {
+        if (!currentUser) {
+            showToast('Iltimos, avval tizimga kiring', 'error');
+            openLoginModal();
+            return;
+        }
+        const lesson = ALL_LESSONS.find(l => l.id === lessonId);
+        if (!lesson || lesson.locked) {
+            showToast('Bu dars hali ochilmagan', 'error');
+            return;
+        }
+        currentLessonId = lessonId;
+        const questions = getLessonQuestions(lessonId);
+        playerState.questions = questions;
+        playerState.currentQuestion = 0;
+        playerState.selectedAnswers = {};
+        playerState.timeSpent = 0;
+        playerState.lessonData = lesson;
+        playerState.isSubmitted = false;
+        if (playerState.timerInterval) clearInterval(playerState.timerInterval);
+        playerState.timerInterval = setInterval(() => {
+            playerState.timeSpent++;
+            const timerEl = document.getElementById('playerTimer');
+            if (timerEl) {
+                const mins = Math.floor(playerState.timeSpent / 60);
+                const secs = playerState.timeSpent % 60;
+                timerEl.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            }
+        }, 1000);
+        navigateTo('player', { lesson, questions });
+    }
+
+    function renderPlayer(data) {
+        const container = document.getElementById('page-player');
+        const { lesson, questions } = data;
+        if (!questions || questions.length === 0) {
+            container.innerHTML = '<div class="text-center py-12"><p class="text-slate-500">Bu dars uchun savollar mavjud emas</p><button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg" onclick="navigateTo(\'lessons\')">Darslarga qaytish</button></div>';
+            return;
+        }
+        const q = questions[playerState.currentQuestion];
+        const total = questions.length;
+        const progress = ((playerState.currentQuestion + 1) / total) * 100;
+
+        let optionsHtml = '';
+        q.options.forEach((opt, idx) => {
+            const isSelected = playerState.selectedAnswers[q.id] === opt;
+            const isCorrect = playerState.isSubmitted && opt === q.correct;
+            const isWrong = playerState.isSubmitted && isSelected && opt !== q.correct;
+            let classNames = 'option-btn w-full text-left p-4 rounded-lg ';
+            if (playerState.isSubmitted) {
+                if (isCorrect) classNames += 'correct ';
+                else if (isWrong) classNames += 'wrong ';
+                else classNames += 'disabled ';
+            } else if (isSelected) {
+                classNames += 'selected ';
+            }
+            const icon = playerState.isSubmitted && isCorrect ? '<i class="fas fa-check text-green-500 ml-auto"></i>' :
+                         playerState.isSubmitted && isWrong ? '<i class="fas fa-times text-red-500 ml-auto"></i>' :
+                         isSelected ? '<i class="fas fa-check text-blue-500 ml-auto"></i>' : '';
+            optionsHtml += `
+                <button class="${classNames}" onclick="selectAnswer('${q.id}', '${opt}')" ${playerState.isSubmitted ? 'disabled' : ''}>
+                    <div class="flex items-center gap-3">
+                        <span class="font-medium text-slate-500">${String.fromCharCode(65 + idx)}.</span>
+                        <span>${opt}</span>
+                        ${icon}
+                    </div>
+                </button>
+            `;
+        });
+
+        container.innerHTML = `
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2 text-sm text-slate-500">
+                            <i class="fas fa-clock"></i>
+                            <span id="playerTimer">00:00</span>
+                        </div>
+                        <div class="text-sm text-slate-500">${playerState.currentQuestion + 1} / ${total}</div>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                        <div class="bg-blue-600 h-2.5 rounded-full progress-bar-animated" style="width: ${progress}%;"></div>
+                    </div>
+                    <h3 class="text-lg font-medium mb-4">${q.text}</h3>
+                    <div class="space-y-3" id="optionsContainer">
+                        ${optionsHtml}
+                    </div>
+                    <div class="flex justify-between mt-6 pt-6 border-t">
+                        <button class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition disabled:opacity-50" 
+                                onclick="prevQuestion()" ${playerState.currentQuestion === 0 || playerState.isSubmitted ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-left mr-2"></i> Oldingi
+                        </button>
+                        <div class="flex gap-2">
+                            ${playerState.isSubmitted ?
+                                `<button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" onclick="navigateTo('lessons')">
+                                    <i class="fas fa-list mr-2"></i> Darslarga qaytish
+                                </button>` :
+                                (playerState.currentQuestion === total - 1 ?
+                                `<button class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition" onclick="submitLesson()">
+                                    <i class="fas fa-check mr-2"></i> Darsni yakunlash
+                                </button>` :
+                                `<button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" onclick="nextQuestion()">
+                                    Keyingi <i class="fas fa-arrow-right ml-2"></i>
+                                </button>`)
+                            }
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm text-slate-400 text-center">
+                        ${Object.keys(playerState.selectedAnswers).length} / ${total} savolga javob berildi
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function selectAnswer(qId, opt) {
+        if (playerState.isSubmitted) return;
+        playerState.selectedAnswers[qId] = opt;
+        const q = playerState.questions[playerState.currentQuestion];
+        const container = document.getElementById('optionsContainer');
+        if (!container) return;
+        const btns = container.querySelectorAll('.option-btn');
+        btns.forEach((btn, idx) => {
+            const optText = q.options[idx];
+            if (playerState.selectedAnswers[q.id] === optText) {
+                btn.classList.add('selected');
+                if (!btn.querySelector('.fa-check')) {
+                    const div = btn.querySelector('div');
+                    const check = document.createElement('i');
+                    check.className = 'fas fa-check text-blue-500 ml-auto';
+                    div.appendChild(check);
+                }
+            } else {
+                btn.classList.remove('selected');
+                const check = btn.querySelector('.fa-check');
+                if (check) check.remove();
+            }
+        });
+    }
+
+    function nextQuestion() {
+        if (playerState.isSubmitted) return;
+        if (playerState.currentQuestion < playerState.questions.length - 1) {
+            playerState.currentQuestion++;
+            const lesson = playerState.lessonData;
+            navigateTo('player', { lesson, questions: playerState.questions });
+        }
+    }
+
+    function prevQuestion() {
+        if (playerState.isSubmitted) return;
+        if (playerState.currentQuestion > 0) {
+            playerState.currentQuestion--;
+            const lesson = playerState.lessonData;
+            navigateTo('player', { lesson, questions: playerState.questions });
+        }
+    }
+
+    function submitLesson() {
+        if (playerState.isSubmitted) return;
+        const total = playerState.questions.length;
+        const answered = Object.keys(playerState.selectedAnswers).length;
+        if (answered < total) {
+            showToast('Savollarning hammasiga javob bering!', 'error');
+            return;
+        }
+
+        let correct = 0;
+        const results = playerState.questions.map(q => {
+            const isCorrect = playerState.selectedAnswers[q.id] === q.correct;
+            if (isCorrect) correct++;
+            return { questionId: q.id, isCorrect, selected: playerState.selectedAnswers[q.id] };
+        });
+
+        const score = Math.round((correct / total) * 100);
+        let stars = 0;
+        if (score >= 90) stars = 3;
+        else if (score >= 70) stars = 2;
+        else if (score >= 50) stars = 1;
+        const xpEarned = stars > 0 ? 10 * stars : 0;
+        const coinsEarned = stars > 0 ? 5 * stars : 0;
+
+        // Update user
+        if (currentUser) {
+            currentUser.xp = (currentUser.xp || 0) + xpEarned;
+            currentUser.coins = (currentUser.coins || 0) + coinsEarned;
+            currentUser.streak = (currentUser.streak || 0) + 1;
+            currentUser.totalTime = (currentUser.totalTime || 0) + Math.ceil(playerState.timeSpent / 60);
+            if (stars > (currentUser.bestStars || 0)) currentUser.bestStars = stars;
+            // Update avg score
+            const completed = ALL_LESSONS.filter(l => l.completed).length;
+            const totalScore = (currentUser.avgScore || 0) * completed + score;
+            currentUser.avgScore = Math.round(totalScore / (completed + 1));
+            // Level up
+            const nextLevelXp = (currentUser.level || 1) * 100;
+            if ((currentUser.xp || 0) >= nextLevelXp) {
+                currentUser.level = (currentUser.level || 1) + 1;
+                currentUser.achievements = (currentUser.achievements || 0) + 1;
+                showToast('🎉 Darajangiz oshdi!', 'success');
+            }
+            // Update weak points based on wrong answers
+            const wrongQuestions = results.filter(r => !r.isCorrect);
+            if (wrongQuestions.length > 0) {
+                const weak = currentUser.weakPoints || [];
+                wrongQuestions.forEach(r => {
+                    const q = playerState.questions.find(q => q.id === r.questionId);
+                    if (q && !weak.includes(q.text.substring(0, 20))) {
+                        weak.push(q.text.substring(0, 20) + '...');
+                    }
+                });
+                currentUser.weakPoints = weak.slice(0, 5);
+            }
+        }
+
+        // Update lesson
+        const lesson = ALL_LESSONS.find(l => l.id === currentLessonId);
+        if (lesson) {
+            lesson.completed = true;
+            lesson.stars = stars;
+            // Unlock next lesson in same section
+            const nextLesson = ALL_LESSONS.find(l => l.section === lesson.section && l.stage === lesson.stage + 1);
+            if (nextLesson) nextLesson.locked = false;
+        }
+
+        if (playerState.timerInterval) {
+            clearInterval(playerState.timerInterval);
+            playerState.timerInterval = null;
+        }
+
+        playerState.isSubmitted = true;
+
+        resultData = {
+            score,
+            stars,
+            xpEarned,
+            coinsEarned,
+            correctCount: correct,
+            totalQuestions: total,
+            questionResults: results,
+            lessonTitle: lesson ? lesson.title : 'Dars'
+        };
+
+        saveUser();
+        navigateTo('result', resultData);
+    }
+
+    // ============================================================
+    //  RESULT SCREEN
+    // ============================================================
+    function renderResult(data) {
+        const container = document.getElementById('page-result');
+        const { score, stars, xpEarned, coinsEarned, correctCount, totalQuestions, questionResults, lessonTitle } = data;
+        const starEmojis = ['📚', '✨', '⭐', '🌟'];
+        const emoji = starEmojis[stars] || '📚';
+
+        let qResultsHtml = questionResults.map((qr, i) => `
+            <div class="flex items-center gap-2 p-2 rounded ${qr.isCorrect ? 'bg-green-50' : 'bg-red-50'}">
+                <i class="fas ${qr.isCorrect ? 'fa-check text-green-500' : 'fa-times text-red-500'}"></i>
+                <span class="text-sm">Savol ${i+1}: ${qr.isCorrect ? 'To‘g‘ri' : 'Noto‘g‘ri'}</span>
+            </div>
+        `).join('');
+
+        container.innerHTML = `
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-8 result-card">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">${emoji}</div>
+                        <h2 class="text-2xl font-bold mb-2">"${lessonTitle}" yakunlandi!</h2>
+                        <div class="flex justify-center gap-2 mb-4">
+                            ${Array.from({ length: 3 }, (_, i) =>
+                                `<i class="fas fa-star text-2xl ${i < stars ? 'text-yellow-400' : 'text-slate-300'}"></i>`
+                            ).join('')}
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <p class="text-sm text-slate-500">To‘g‘ri javoblar</p>
+                                <p class="text-xl font-bold text-blue-600">${score}%</p>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <p class="text-sm text-slate-500">XP</p>
+                                <p class="text-xl font-bold text-green-600">+${xpEarned}</p>
+                            </div>
+                            <div class="bg-yellow-50 p-3 rounded-lg">
+                                <p class="text-sm text-slate-500">Tangalar</p>
+                                <p class="text-xl font-bold text-yellow-600">+${coinsEarned}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2 mb-6 text-left">
+                            ${qResultsHtml}
+                        </div>
+                        <div class="flex gap-3 justify-center flex-wrap">
+                            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition" onclick="navigateTo('dashboard')">
+                                <i class="fas fa-home mr-2"></i> Dashboard
+                            </button>
+                            ${stars >= 2 ? `<button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition" onclick="goToNextLesson()">
+                                <i class="fas fa-arrow-right mr-2"></i> Keyingi dars
+                            </button>` : ''}
+                            <button class="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-lg transition" onclick="navigateTo('lessons')">
+                                <i class="fas fa-list mr-2"></i> Darslar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function goToNextLesson() {
+        const current = ALL_LESSONS.find(l => l.id === currentLessonId);
+        if (!current) { navigateTo('lessons'); return; }
+        const next = ALL_LESSONS.find(l => l.section === current.section && l.stage === current.stage + 1);
+        if (next && !next.locked) {
+            startLesson(next.id);
+        } else {
+            showToast('Keyingi dars hali ochilmagan', 'info');
+            navigateTo('lessons');
+        }
+    }
+
+    // ============================================================
+    //  UTILITY FUNCTIONS
+    // ============================================================
+    function viewLesson(id) {
+        const lesson = ALL_LESSONS.find(l => l.id === id);
+        if (lesson) {
+            showToast(`Dars: ${lesson.title}\nBo‘lim: ${lesson.section}\nYulduzlar: ${lesson.stars || 0}`, 'info');
+        }
+    }
+
+    function resetDailyGoal() {
+        if (!currentUser) {
+            showToast('Iltimos, avval tizimga kiring', 'error');
+            return;
+        }
+        showToast('Kunlik maqsad yangilandi! Bugun 1 ta dars yakunlang', 'success');
+    }
+
+    function resetProgress() {
+        if (!currentUser) {
+            showToast('Iltimos, avval tizimga kiring', 'error');
+            return;
+        }
+        if (!confirm('Progressni tiklashni xohlaysizmi? Bu amalni qaytarib bo\'lmaydi!')) return;
+        ALL_LESSONS.forEach(l => {
+            l.completed = false;
+            l.stars = 0;
+            l.locked = l.stage > 1;
+        });
+        ALL_LESSONS[0].locked = false;
+        currentUser.xp = 0;
+        currentUser.coins = 10;
+        currentUser.streak = 0;
+        currentUser.level = 1;
+        currentUser.completedLessons = 0;
+        currentUser.totalTime = 0;
+        currentUser.bestStars = 0;
+        currentUser.avgScore = 0;
+        currentUser.achievements = 0;
+        currentUser.weakPoints = [];
+        saveUser();
+        updateUI();
+        showToast('Progress tiklandi', 'info');
+        navigateTo('dashboard');
+    }
+
+    // ============================================================
+    //  EVENT LISTENERS & INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load data from localStorage
+        const data = loadData();
+        if (data && data.users) {
+            const emails = Object.keys(data.users);
+            if (emails.length > 0) {
+                // Auto-login first user for demo
+                loadUser(emails[0]);
+            }
+        }
+
+        // Set up filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterLessons(this.dataset.section);
+            });
+        });
+
+        // Leaderboard filters
+        document.querySelectorAll('.leaderboard-filter').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.leaderboard-filter').forEach(b => {
+                    b.classList.remove('bg-blue-600', 'text-white');
+                    b.classList.add('border', 'border-slate-200', 'bg-transparent', 'text-slate-700');
+                });
+                this.classList.remove('border', 'border-slate-200', 'bg-transparent', 'text-slate-700');
+                this.classList.add('bg-blue-600', 'text-white');
+                renderLeaderboard();
+            });
+        });
+
+        // Set active nav
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            if (btn.dataset.page === 'dashboard') btn.classList.add('bg-slate-100', 'font-semibold');
+        });
+
+        updateUI();
+        renderDashboard();
+
+        // Auto-login with demo account if no user
+        if (!currentUser) {
+            const demoEmail = 'demo@englishlearn.com';
+            const data = loadData();
+            if (!data || !data.users || !data.users[demoEmail]) {
+                // Create demo user
+                const demoData = loadData() || { users: {} };
+                demoData.users[demoEmail] = {
+                    name: 'Demo User',
+                    email: demoEmail,
+                    xp: 150,
+                    coins: 45,
+                    streak: 3,
+                    level: 2,
+                    completedLessons: 2,
+                    totalTime: 15,
+                    bestStars: 3,
+                    avgScore: 75,
+                    achievements: 1,
+                    weakPoints: ['Listening', 'Vocabulary']
+                };
+                // Mark some lessons as completed
+                ALL_LESSONS[0].completed = true;
+                ALL_LESSONS[0].stars = 3;
+                ALL_LESSONS[0].locked = false;
+                ALL_LESSONS[1].completed = true;
+                ALL_LESSONS[1].stars = 2;
+                ALL_LESSONS[1].locked = false;
+                ALL_LESSONS[2].locked = false;
+                demoData.lessonProgress = {};
+                ALL_LESSONS.forEach(l => {
+                    demoData.lessonProgress[l.id] = {
+                        completed: l.completed || false,
+                        stars: l.stars || 0,
+                        locked: l.locked || false
+                    };
+                });
+                localStorage.setItem('englishlearn_data', JSON.stringify(demoData));
+            }
+            loadUser(demoEmail);
+            updateUI();
+        }
+
+        console.log('✅ EnglishLearn to‘liq funksional prototip ishga tushdi!');
+    });
+
+    // Close modals on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeLoginModal();
+            closeRegisterModal();
+        }
+    });
+
+    // Click outside modal to close
+    document.getElementById('loginModal').addEventListener('click', function(e) {
+        if (e.target === this) closeLoginModal();
+    });
+    document.getElementById('registerModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRegisterModal();
+    });
+</script>
+
+</body>
+</html>

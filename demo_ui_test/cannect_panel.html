@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnglishLearn — 3-in-1 Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+        }
+        .container-custom { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
+        
+        .platform-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 2rem;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
+        }
+        .platform-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .platform-card:hover::before { opacity: 1; }
+        .platform-card:hover {
+            transform: translateY(-16px) scale(1.02);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .platform-card .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.4s;
+        }
+        .platform-card:hover .icon-wrapper {
+            transform: scale(1.1) rotate(-8deg);
+        }
+        
+        .platform-card .badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .platform-card .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        .platform-card .feature-list li {
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+        }
+        .platform-card .feature-list li i {
+            width: 20px;
+        }
+        
+        .platform-card .btn-platform {
+            margin-top: auto;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            font-size: 1rem;
+        }
+        .platform-card .btn-platform:hover {
+            transform: scale(1.03);
+        }
+        
+        .card-user { border-top: 3px solid #60a5fa; }
+        .card-user .icon-wrapper { background: rgba(96, 165, 250, 0.2); color: #60a5fa; }
+        .card-user .badge { background: rgba(96, 165, 250, 0.2); color: #60a5fa; }
+        .card-user .btn-platform { background: #3b82f6; color: white; }
+        .card-user .btn-platform:hover { background: #2563eb; box-shadow: 0 8px 30px rgba(59,130,246,0.4); }
+        .card-user .feature-list li i { color: #60a5fa; }
+        .card-user h3 { color: white; }
+        .card-user p { color: rgba(255,255,255,0.6); }
+        .card-user .stat-item { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+        .card-user .stat-item .number { color: white; }
+        .card-user .stat-item .label { color: rgba(255,255,255,0.5); }
+        
+        .card-teacher { border-top: 3px solid #34d399; }
+        .card-teacher .icon-wrapper { background: rgba(52, 211, 153, 0.2); color: #34d399; }
+        .card-teacher .badge { background: rgba(52, 211, 153, 0.2); color: #34d399; }
+        .card-teacher .btn-platform { background: #22c55e; color: white; }
+        .card-teacher .btn-platform:hover { background: #16a34a; box-shadow: 0 8px 30px rgba(34,197,94,0.4); }
+        .card-teacher .feature-list li i { color: #34d399; }
+        .card-teacher h3 { color: white; }
+        .card-teacher p { color: rgba(255,255,255,0.6); }
+        .card-teacher .stat-item { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+        .card-teacher .stat-item .number { color: white; }
+        .card-teacher .stat-item .label { color: rgba(255,255,255,0.5); }
+        
+        .card-admin { border-top: 3px solid #f87171; }
+        .card-admin .icon-wrapper { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+        .card-admin .badge { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+        .card-admin .btn-platform { background: #ef4444; color: white; }
+        .card-admin .btn-platform:hover { background: #dc2626; box-shadow: 0 8px 30px rgba(239,68,68,0.4); }
+        .card-admin .feature-list li i { color: #f87171; }
+        .card-admin h3 { color: white; }
+        .card-admin p { color: rgba(255,255,255,0.6); }
+        .card-admin .stat-item { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+        .card-admin .stat-item .number { color: white; }
+        .card-admin .stat-item .label { color: rgba(255,255,255,0.5); }
+        
+        .header-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .header-title h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 4px 40px rgba(0,0,0,0.3);
+        }
+        .header-title h1 .highlight { 
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-title p {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+        }
+        
+        .footer-text {
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4rem;
+            font-size: 0.9rem;
+        }
+        
+        .stats-mini {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 1rem 0;
+        }
+        .stats-mini .stat-item {
+            text-align: center;
+            padding: 10px;
+            border-radius: 12px;
+        }
+        .stats-mini .stat-item .number {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .stats-mini .stat-item .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-title h1 { font-size: 2.5rem; }
+            .platform-card { min-height: 320px; padding: 1.5rem; }
+            .stats-mini { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: particleFloat 25s infinite linear;
+        }
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .glow-1 { background: #60a5fa; top: -100px; right: -100px; }
+        .glow-2 { background: #34d399; bottom: -100px; left: -100px; }
+        .glow-3 { background: #f87171; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+        .float-animation { animation: float 4s ease-in-out infinite; }
+        
+        .modal-bg {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-content {
+            animation: modalFadeIn 0.4s ease;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            margin: 12px 0;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .code-block .comment { color: #94a3b8; }
+        .code-block .string { color: #86efac; }
+        .code-block .keyword { color: #93c5fd; }
+        .code-block .function { color: #fcd34d; }
+        
+        .toast-custom {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 14px 32px;
+            border-radius: 16px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        
+        .badge-role {
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Glows -->
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+<div class="glow glow-3"></div>
+
+<div class="container-custom relative z-10">
+
+    <!-- Header -->
+    <div class="header-title float-animation">
+        <h1>📚 <span class="highlight">EnglishLearn</span></h1>
+        <p>3-in-1 platform — Foydalanuvchi, O'qituvchi va Admin interfeyslari</p>
+        <div class="flex justify-center gap-3 mt-4 flex-wrap">
+            <span class="px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-sm border border-white/5">
+                <i class="fas fa-users mr-2"></i> 3 rol
+            </span>
+            <span class="px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-sm border border-white/5">
+                <i class="fas fa-rocket mr-2"></i> 10+ darslar
+            </span>
+            <span class="px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-sm border border-white/5">
+                <i class="fas fa-star mr-2"></i> Interaktiv
+            </span>
+            <span class="px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-sm border border-white/5">
+                <i class="fas fa-database mr-2"></i> LocalStorage
+            </span>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="grid md:grid-cols-3 gap-8">
+
+        <!-- USER CARD -->
+        <div class="platform-card card-user" onclick="openModal('user')">
+            <span class="badge"><i class="fas fa-user mr-1"></i> Asosiy</span>
+            <div class="icon-wrapper">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <h3 class="text-2xl font-bold">👤 Foydalanuvchi</h3>
+            <p class="text-sm mt-1">O'quvchi interfeysi</p>
+            
+            <div class="stats-mini">
+                <div class="stat-item"><div class="number">12</div><div class="label">Darslar</div></div>
+                <div class="stat-item"><div class="number">5</div><div class="label">Yakunlangan</div></div>
+                <div class="stat-item"><div class="number">⭐3</div><div class="label">Eng yaxshi</div></div>
+            </div>
+
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> Darslarni o'rganish</li>
+                <li><i class="fas fa-check-circle"></i> Test topshirish</li>
+                <li><i class="fas fa-check-circle"></i> Reytingda qatnashish</li>
+                <li><i class="fas fa-check-circle"></i> Yutuqlar va tangalar</li>
+                <li><i class="fas fa-check-circle"></i> Shaxsiy profil</li>
+            </ul>
+
+            <button class="btn-platform" onclick="event.stopPropagation(); openModal('user')">
+                <i class="fas fa-arrow-right"></i> Foydalanuvchi sifatida kirish
+            </button>
+        </div>
+
+        <!-- TEACHER CARD -->
+        <div class="platform-card card-teacher" onclick="openModal('teacher')">
+            <span class="badge"><i class="fas fa-chalkboard-teacher mr-1"></i> O'qituvchi</span>
+            <div class="icon-wrapper">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h3 class="text-2xl font-bold">🧑‍🏫 O'qituvchi</h3>
+            <p class="text-sm mt-1">Dars yaratish va boshqarish</p>
+            
+            <div class="stats-mini">
+                <div class="stat-item"><div class="number">8</div><div class="label">Darslar</div></div>
+                <div class="stat-item"><div class="number">20</div><div class="label">Savollar</div></div>
+                <div class="stat-item"><div class="number">12</div><div class="label">O'quvchilar</div></div>
+            </div>
+
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> Darslar yaratish</li>
+                <li><i class="fas fa-check-circle"></i> Savollar qo'shish</li>
+                <li><i class="fas fa-check-circle"></i> O'quvchilarni kuzatish</li>
+                <li><i class="fas fa-check-circle"></i> Baholash tizimi</li>
+                <li><i class="fas fa-check-circle"></i> Hisobotlar</li>
+            </ul>
+
+            <button class="btn-platform" onclick="event.stopPropagation(); openModal('teacher')">
+                <i class="fas fa-arrow-right"></i> O'qituvchi sifatida kirish
+            </button>
+        </div>
+
+        <!-- ADMIN CARD -->
+        <div class="platform-card card-admin" onclick="openModal('admin')">
+            <span class="badge"><i class="fas fa-shield-alt mr-1"></i> Admin</span>
+            <div class="icon-wrapper">
+                <i class="fas fa-user-cog"></i>
+            </div>
+            <h3 class="text-2xl font-bold">🔧 Admin</h3>
+            <p class="text-sm mt-1">To'liq boshqaruv paneli</p>
+            
+            <div class="stats-mini">
+                <div class="stat-item"><div class="number">25</div><div class="label">Foydalanuvchilar</div></div>
+                <div class="stat-item"><div class="number">12</div><div class="label">Darslar</div></div>
+                <div class="stat-item"><div class="number">35</div><div class="label">Savollar</div></div>
+            </div>
+
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> To'liq boshqaruv paneli</li>
+                <li><i class="fas fa-check-circle"></i> Foydalanuvchilarni boshqarish</li>
+                <li><i class="fas fa-check-circle"></i> Dars va savollar</li>
+                <li><i class="fas fa-check-circle"></i> Statistika va grafiklar</li>
+                <li><i class="fas fa-check-circle"></i> Eksport/Import</li>
+            </ul>
+
+            <button class="btn-platform" onclick="event.stopPropagation(); openModal('admin')">
+                <i class="fas fa-arrow-right"></i> Admin sifatida kirish
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-text">
+        <p>© 2026 EnglishLearn — Barcha huquqlar himoyalangan</p>
+        <p class="text-xs mt-1">3-in-1 platform: Foydalanuvchi · O'qituvchi · Admin</p>
+        <p class="text-xs mt-2 text-white/20">⌨️ 1 · 2 · 3 tezkor tugmalar</p>
+    </div>
+
+</div>
+
+<!-- ==================== MODAL ==================== -->
+<div id="platformModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-slate-900 rounded-3xl p-8 w-full max-w-3xl shadow-2xl relative max-h-[90vh] overflow-y-auto border border-white/10">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-white/50 hover:text-white text-2xl transition">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div id="modalContent" class="text-white">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    //  PARTICLES
+    // ============================================================
+    (function createParticles() {
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 40; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.width = (Math.random() * 5 + 2) + 'px';
+            p.style.height = p.style.width;
+            p.style.animationDuration = (15 + Math.random() * 25) + 's';
+            p.style.animationDelay = (Math.random() * 15) + 's';
+            container.appendChild(p);
+        }
+    })();
+
+    // ============================================================
+    //  PLATFORM DATA
+    // ============================================================
+    const platformData = {
+        user: {
+            title: '👤 Foydalanuvchi interfeysi',
+            icon: 'fa-user-graduate',
+            color: '#60a5fa',
+            description: 'O\'quvchilar uchun to\'liq ta\'lim platformasi',
+            badge: 'Asosiy',
+            features: [
+                '📚 12+ interaktiv darslar',
+                '❓ 25+ test savollari',
+                '⭐ Yulduzli baholash tizimi',
+                '🪙 Tangalar va yutuqlar',
+                '🏆 Reyting jadvali',
+                '📊 Shaxsiy progress'
+            ],
+            stats: [
+                { label: 'Darslar', value: 12 },
+                { label: 'Yakunlangan', value: 5 },
+                { label: 'Eng yaxshi', value: '⭐3' },
+                { label: 'XP', value: '420' },
+                { label: 'Tangalar', value: '185' }
+            ],
+            code: `class UserInterface {
+    constructor() {
+        this.lessons = [];
+        this.progress = { xp: 0, level: 1 };
+    }
+    startLesson(id) {
+        this.currentLesson = id;
+        this.loadQuestions(id);
+    }
+    submitAnswer(qId, answer) {
+        const correct = this.checkAnswer(qId, answer);
+        if (correct) this.addXP(10);
+        return correct;
+    }
+}`,
+            url: '#user-dashboard',
+            role: 'Foydalanuvchi'
+        },
+        
+        teacher: {
+            title: '🧑‍🏫 O\'qituvchi interfeysi',
+            icon: 'fa-chalkboard-teacher',
+            color: '#34d399',
+            description: 'O\'qituvchilar uchun dars yaratish va boshqarish',
+            badge: 'O\'qituvchi',
+            features: [
+                '📝 Darslar yaratish va tahrirlash',
+                '❓ Savollar qo\'shish tizimi',
+                '👨‍🎓 O\'quvchilarni kuzatish',
+                '📊 Baholash va hisobotlar',
+                '📈 O\'quvchilar statistikasi',
+                '🔔 Yangiliklar va eslatmalar'
+            ],
+            stats: [
+                { label: 'Darslar', value: 8 },
+                { label: 'Savollar', value: 20 },
+                { label: 'O\'quvchilar', value: 12 },
+                { label: 'O\'rtacha ball', value: '76%' },
+                { label: 'Tugallanish', value: '68%' }
+            ],
+            code: `class TeacherInterface {
+    constructor() {
+        this.courses = [];
+        this.students = [];
+        this.questions = {};
+    }
+    createLesson(title, section, stage) {
+        const lesson = {
+            id: 'l' + Date.now().toString(36),
+            title, section, stage
+        };
+        this.courses.push(lesson);
+        return lesson;
+    }
+    addQuestion(lessonId, data) {
+        if (!this.questions[lessonId]) this.questions[lessonId] = [];
+        this.questions[lessonId].push({ id: 'q' + Date.now().toString(36), ...data });
+    }
+}`,
+            url: '#teacher-dashboard',
+            role: 'O\'qituvchi'
+        },
+        
+        admin: {
+            title: '🔧 Admin panel',
+            icon: 'fa-user-cog',
+            color: '#f87171',
+            description: 'To\'liq boshqaruv paneli — tizimni nazorat qilish',
+            badge: 'Admin',
+            features: [
+                '📊 Real vaqt statistikasi',
+                '👥 Foydalanuvchilarni boshqarish',
+                '📚 Darslar va savollar CRUD',
+                '📈 Grafiklar va analitika',
+                '⚙️ Tizim sozlamalari',
+                '💾 Eksport/Import funksiyalari'
+            ],
+            stats: [
+                { label: 'Foydalanuvchilar', value: 25 },
+                { label: 'Darslar', value: 12 },
+                { label: 'Savollar', value: 35 },
+                { label: 'Yakunlangan', value: '48' },
+                { label: 'Faol foydalanuvchilar', value: '8' }
+            ],
+            code: `class AdminPanel {
+    constructor() {
+        this.users = [];
+        this.lessons = [];
+        this.settings = {};
+    }
+    getStats() {
+        return {
+            totalUsers: this.users.length,
+            totalLessons: this.lessons.length,
+            totalQuestions: this.lessons.reduce((sum, l) => 
+                sum + (l.questions?.length || 0), 0
+            )
+        };
+    }
+    exportData() {
+        return JSON.stringify({ users: this.users, lessons: this.lessons });
+    }
+}`,
+            url: '#admin-dashboard',
+            role: 'Admin'
+        }
+    };
+
+    // ============================================================
+    //  MODAL FUNCTIONS
+    // ============================================================
+    function openModal(type) {
+        const data = platformData[type];
+        if (!data) return;
+        
+        const modal = document.getElementById('platformModal');
+        const content = document.getElementById('modalContent');
+        
+        const statsHtml = data.stats.map(s => `
+            <div class="bg-white/5 rounded-xl p-3 text-center">
+                <div class="text-xl font-bold" style="color: ${data.color}">${s.value}</div>
+                <div class="text-xs text-white/50">${s.label}</div>
+            </div>
+        `).join('');
+        
+        const featuresHtml = data.features.map(f => `
+            <div class="flex items-center gap-2 text-sm text-white/80 bg-white/5 p-2 rounded-lg">
+                <i class="fas fa-check-circle" style="color: ${data.color}"></i>
+                ${f}
+            </div>
+        `).join('');
+        
+        content.innerHTML = `
+            <div class="modal-content">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl" 
+                         style="background: ${data.color}20; color: ${data.color}">
+                        <i class="fas ${data.icon}"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">${data.title}</h2>
+                        <p class="text-white/60">${data.description}</p>
+                    </div>
+                    <span class="ml-auto badge-role px-3 py-1.5" style="background: ${data.color}25; color: ${data.color}">
+                        ${data.badge}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+                    ${statsHtml}
+                </div>
+
+                <h4 class="font-semibold mb-3 text-white/90"><i class="fas fa-star text-yellow-400 mr-2"></i>Xususiyatlar</h4>
+                <div class="grid grid-cols-2 gap-2 mb-6">
+                    ${featuresHtml}
+                </div>
+
+                <h4 class="font-semibold mb-3 text-white/90"><i class="fas fa-code mr-2"></i>Kod namunasi</h4>
+                <div class="code-block">
+                    ${data.code}
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button onclick="openPlatform('${type}')" 
+                            class="flex-1 py-3 rounded-xl font-semibold text-white transition hover:scale-105"
+                            style="background: ${data.color}">
+                        <i class="fas fa-rocket mr-2"></i> 
+                        ${data.role} interfeysini ochish
+                    </button>
+                    <button onclick="closeModal()" 
+                            class="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition font-medium text-white/80">
+                        Yopish
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        document.getElementById('platformModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // ============================================================
+    //  OPEN PLATFORM
+    // ============================================================
+    function openPlatform(type) {
+        closeModal();
+        const messages = {
+            user: '👤 Foydalanuvchi interfeysi ochilmoqda...',
+            teacher: '🧑‍🏫 O\'qituvchi interfeysi ochilmoqda...',
+            admin: '🔧 Admin panel ochilmoqda...'
+        };
+        showToast(messages[type], type);
+        
+        // Generate and display the appropriate interface
+        setTimeout(() => {
+            const modal = document.getElementById('platformModal');
+            const content = document.getElementById('modalContent');
+            
+            if (type === 'user') {
+                content.innerHTML = generateUserUI();
+            } else if (type === 'teacher') {
+                content.innerHTML = generateTeacherUI();
+            } else if (type === 'admin') {
+                content.innerHTML = generateAdminUI();
+            }
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }, 500);
+    }
+
+    // ============================================================
+    //  GENERATE UI COMPONENTS
+    // ============================================================
+    function generateUserUI() {
+        return `
+            <div class="modal-content">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 text-xl">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">👤 Foydalanuvchi paneli</h2>
+                            <p class="text-white/60 text-sm">Darslarni o'rganing va bilimingizni oshiring</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal()" class="text-white/50 hover:text-white text-xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-4 gap-3 mb-6">
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-blue-400">12</div>
+                        <div class="text-xs text-white/50">Darslar</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-blue-400">5</div>
+                        <div class="text-xs text-white/50">Yakunlangan</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-blue-400">⭐3</div>
+                        <div class="text-xs text-white/50">Eng yaxshi</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-blue-400">420</div>
+                        <div class="text-xs text-white/50">XP</div>
+                    </div>
+                </div>
+
+                <!-- Lessons -->
+                <h4 class="font-semibold mb-3 text-white/90"><i class="fas fa-book mr-2 text-blue-400"></i>Darslar</h4>
+                <div class="space-y-2 mb-6 max-h-60 overflow-y-auto">
+                    ${['Greetings ✅', 'Family ✅', 'Daily Routine ⏳', 'Food 🔒', 'Shopping 🔒', 'Numbers ✅', 'Time ⏳'].map((l, i) => `
+                        <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition cursor-pointer">
+                            <span class="text-white/90">${l}</span>
+                            <span class="text-xs ${l.includes('✅') ? 'text-green-400' : l.includes('⏳') ? 'text-yellow-400' : 'text-white/30'}">
+                                ${l.includes('✅') ? 'Yakunlangan' : l.includes('⏳') ? 'Davom etmoqda' : '🔒 Yopiq'}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <button onclick="showToast('📚 Darslar sahifasi ochilmoqda...', 'info')" 
+                        class="w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-xl text-white font-semibold transition">
+                    <i class="fas fa-play mr-2"></i> Davom etish
+                </button>
+            </div>
+        `;
+    }
+
+    function generateTeacherUI() {
+        return `
+            <div class="modal-content">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-green-400 text-xl">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">🧑‍🏫 O'qituvchi paneli</h2>
+                            <p class="text-white/60 text-sm">Darslar yarating va o'quvchilarni boshqaring</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal()" class="text-white/50 hover:text-white text-xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-4 gap-3 mb-6">
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-green-400">8</div>
+                        <div class="text-xs text-white/50">Darslar</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-green-400">20</div>
+                        <div class="text-xs text-white/50">Savollar</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-green-400">12</div>
+                        <div class="text-xs text-white/50">O'quvchilar</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-green-400">76%</div>
+                        <div class="text-xs text-white/50">O'rtacha ball</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button onclick="showToast('📝 Yangi dars yaratish formasi ochilmoqda...', 'info')" 
+                            class="p-4 bg-green-500/20 hover:bg-green-500/30 rounded-xl text-green-400 transition border border-green-500/20">
+                        <i class="fas fa-plus text-2xl block mb-1"></i>
+                        <span class="text-sm">Yangi dars</span>
+                    </button>
+                    <button onclick="showToast('❓ Yangi savol qo\'shish formasi ochilmoqda...', 'info')" 
+                            class="p-4 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl text-blue-400 transition border border-blue-500/20">
+                        <i class="fas fa-question text-2xl block mb-1"></i>
+                        <span class="text-sm">Savol qo'shish</span>
+                    </button>
+                </div>
+
+                <h4 class="font-semibold mb-3 text-white/90"><i class="fas fa-users mr-2 text-green-400"></i>O'quvchilar</h4>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                    ${['Dilshod - 85%', 'Gulnora - 92%', 'Jasur - 78%', 'Sarvar - 65%', 'Madina - 88%'].map(s => `
+                        <div class="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+                            <span class="text-white/80">${s}</span>
+                            <span class="text-xs text-green-400">● Faol</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function generateAdminUI() {
+        return `
+            <div class="modal-content">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400 text-xl">
+                            <i class="fas fa-user-cog"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">🔧 Admin panel</h2>
+                            <p class="text-white/60 text-sm">Tizimni to'liq nazorat qiling</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal()" class="text-white/50 hover:text-white text-xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-4 gap-3 mb-6">
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-red-400">25</div>
+                        <div class="text-xs text-white/50">Foydalanuvchilar</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-red-400">12</div>
+                        <div class="text-xs text-white/50">Darslar</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-red-400">35</div>
+                        <div class="text-xs text-white/50">Savollar</div>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-red-400">48</div>
+                        <div class="text-xs text-white/50">Yakunlangan</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <button onclick="showToast('👥 Foydalanuvchilar boshqaruvi ochilmoqda...', 'info')" 
+                            class="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/80 transition border border-white/5">
+                        <i class="fas fa-users text-xl block mb-1"></i>
+                        <span class="text-sm">Foydalanuvchilar</span>
+                    </button>
+                    <button onclick="showToast('📚 Darslar boshqaruvi ochilmoqda...', 'info')" 
+                            class="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/80 transition border border-white/5">
+                        <i class="fas fa-book text-xl block mb-1"></i>
+                        <span class="text-sm">Darslar</span>
+                    </button>
+                    <button onclick="showToast('⚙️ Sozlamalar ochilmoqda...', 'info')" 
+                            class="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-white/80 transition border border-white/5">
+                        <i class="fas fa-cog text-xl block mb-1"></i>
+                        <span class="text-sm">Sozlamalar</span>
+                    </button>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="showToast('💾 Ma\'lumotlar eksport qilindi', 'success')" 
+                            class="flex-1 py-2.5 bg-green-500/20 hover:bg-green-500/30 rounded-xl text-green-400 transition border border-green-500/20 text-sm">
+                        <i class="fas fa-download mr-2"></i> Eksport
+                    </button>
+                    <button onclick="showToast('📥 Ma\'lumotlar import qilindi', 'success')" 
+                            class="flex-1 py-2.5 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-xl text-yellow-400 transition border border-yellow-500/20 text-sm">
+                        <i class="fas fa-upload mr-2"></i> Import
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // ============================================================
+    //  TOAST
+    // ============================================================
+    function showToast(message, type = 'info') {
+        const existing = document.querySelector('.toast-custom');
+        if (existing) existing.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast-custom';
+        const colors = {
+            user: 'bg-blue-500',
+            teacher: 'bg-green-500',
+            admin: 'bg-red-500',
+            success: 'bg-emerald-500',
+            error: 'bg-red-500',
+            info: 'bg-blue-500',
+            warning: 'bg-yellow-500'
+        };
+        toast.style.background = colors[type] || colors.info;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    // ============================================================
+    //  KEYBOARD SHORTCUTS
+    // ============================================================
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === '1') openModal('user');
+        if (e.key === '2') openModal('teacher');
+        if (e.key === '3') openModal('admin');
+    });
+
+    // Click outside modal
+    document.getElementById('platformModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ============================================================
+    //  CONSOLE
+    // ============================================================
+    console.log('%c📚 EnglishLearn 3-in-1 Platform', 'font-size: 24px; font-weight: bold; color: #60a5fa;');
+    console.log('%c⌨️ Keyboard shortcuts:', 'font-size: 14px; font-weight: bold;');
+    console.log('  1 → 👤 User');
+    console.log('  2 → 🧑‍🏫 Teacher');
+    console.log('  3 → 🔧 Admin');
+    console.log('  ESC → Close');
+    console.log('%c✨ 3-in-1 platform ishga tushdi!', 'font-size: 14px; color: #34d399;');
+</script>
+
+</body>
+</html>

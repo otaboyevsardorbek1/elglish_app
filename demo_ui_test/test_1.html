@@ -8,9 +8,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* ===== GLOBAL ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f1f5f9; }
     .container-custom { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
     .page-section { display: none; animation: fadeIn 0.25s ease; }
     .page-section.active { display: block; }
@@ -19,8 +18,12 @@
     .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.07); }
     .star-filled { color: #facc15; }
     .star-empty { color: #d1d5db; }
+    .tab-active { border-bottom: 3px solid #3b82f6; color: #1e293b; font-weight: 600; }
+    .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
+    .tab-inactive:hover { color: #1e293b; }
     .modal-bg { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
     .progress-bar-animated { transition: width 0.5s ease; }
+    .lesson-locked { opacity: 0.6; filter: grayscale(0.3); pointer-events: none; }
     .avatar-ring { border: 3px solid #e2e8f0; }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
@@ -67,10 +70,9 @@
     .main-content { flex: 1; padding: 24px; }
     .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
     @media (max-width: 768px) { .sidebar { width: 100%; min-height: auto; } .flex-admin { flex-direction: column; } }
+    .fade-enter { animation: fadeIn 0.3s ease; }
     .question-item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
     .question-item:hover { background: #f8fafc; }
-
-    /* Landing cards */
     .platform-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 24px; padding: 2rem; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; border: 2px solid transparent; position: relative; overflow: hidden; min-height: 400px; display: flex; flex-direction: column; }
     .platform-card:hover { transform: translateY(-12px) scale(1.01); box-shadow: 0 30px 60px rgba(0,0,0,0.3); border-color: #fff; }
     .platform-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #667eea, #764ba2, #f093fb); opacity: 0; transition: opacity 0.3s; }
@@ -111,6 +113,12 @@
     .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
     .particle { position: absolute; width: 6px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 50%; animation: particleFloat 20s infinite linear; }
     @keyframes particleFloat { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; } }
+    .code-block { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 0.75rem; overflow-x: auto; margin: 12px 0; max-height: 180px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); }
+    .code-block .comment { color: #94a3b8; }
+    .code-block .string { color: #86efac; }
+    .code-block .keyword { color: #93c5fd; }
+    .code-block .function { color: #fcd34d; }
+    .badge-role { padding: 2px 12px; border-radius: 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   </style>
 </head>
 <body>
@@ -202,22 +210,11 @@
       <div class="footer-text">
         <p>© 2026 EnglishLearn — Barcha huquqlar himoyalangan</p>
         <p class="text-xs mt-1">3-in-1 platform: Foydalanuvchi · O'qituvchi · Admin</p>
-        <br>
-        <p class="text-xs mt-1">
-            <ol><ul>
-                <a href="./demo_ui_test/admin.html" target="_blank" rel="noopener noreferrer">admin ui</a><br>
-                <a href="./demo_ui_test/cannect_panel.html" target="_blank" rel="noopener noreferrer">cannect_panel ui</a><br>
-                <a href="./demo_ui_test/index.html" target="_blank" rel="noopener noreferrer">index ui</a><br>
-                <a href="./demo_ui_test/indexx.html" target="_blank" rel="noopener noreferrer">indexx ui</a><br>
-                <a href="./demo_ui_test/test_1.html" target="_blank" rel="noopener noreferrer">test_1 ui</a><br>
-                <a href="./demo_ui_test/user.html" target="_blank" rel="noopener noreferrer">user ui</a><br>
-            </ul></ol>
-        </p>
       </div>
     </div>
   </div>
 
-  <!-- ========== USER INTERFACE ========== -->
+  <!-- ========== USER INTERFACE (index_v1) ========== -->
   <div id="userInterface" class="hidden min-h-screen bg-slate-50">
     <!-- user nav -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60">
@@ -286,6 +283,7 @@
           </div>
         </div>
         <div class="md:col-span-3" id="teacherContent">
+          <!-- teacher pages -->
           <section id="teacher-overview" class="page-section active">...</section>
           <section id="teacher-lessons" class="page-section">...</section>
           <section id="teacher-questions" class="page-section">...</section>
@@ -295,7 +293,7 @@
     </div>
   </div>
 
-  <!-- ========== ADMIN INTERFACE ========== -->
+  <!-- ========== ADMIN INTERFACE (admin-panel) ========== -->
   <div id="adminInterface" class="hidden min-h-screen bg-slate-50">
     <header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
       <div class="container-custom flex items-center justify-between h-16">
@@ -350,7 +348,7 @@
 <div id="toastContainer"></div>
 
 <!-- ===== MODALS (shared) ===== -->
-<!-- Lesson Modal -->
+<!-- Lesson Modal (for teacher & admin) -->
 <div id="lessonModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
     <button onclick="closeLessonModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fas fa-times"></i></button>
@@ -367,7 +365,7 @@
   </div>
 </div>
 
-<!-- Question Modal -->
+<!-- Question Modal (for teacher & admin) -->
 <div id="questionModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
     <button onclick="closeQuestionModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fas fa-times"></i></button>
@@ -383,12 +381,13 @@
   </div>
 </div>
 
-<!-- ============================== JAVASCRIPT ============================== -->
+<!-- ===== JAVASCRIPT ===== -->
 <script>
 // ============================================================
 //  GLOBAL DATA & STATE
 // ============================================================
 const APP = {
+  // All lessons (shared across roles)
   lessons: [
     { id: 'l1', title: 'Greetings', section: 'BEGINNER', stage: 1, isFree: true, completed: false, stars: 0, locked: false },
     { id: 'l2', title: 'Family', section: 'BEGINNER', stage: 2, isFree: true, completed: false, stars: 0, locked: true },
@@ -417,7 +416,7 @@ const APP = {
       { id: 'q3', text: 'How many zeros in one hundred?', options: ['1', '2', '3', '4'], correct: '2' }
     ]
   },
-  users: [],
+  users: [], // [{ name, email, xp, coins, streak, level, completedLessons, totalTime, bestStars, avgScore, achievements, weakPoints }]
   currentUser: null,
   settings: { siteName: 'EnglishLearn', lessonsPerPage: 10, maxQuestions: 20 }
 };
@@ -469,7 +468,7 @@ function showToast(message, type = 'info') {
 }
 
 // ============================================================
-//  SWITCH INTERFACES
+//  LANDING ↔ INTERFACES
 // ============================================================
 function switchToLanding() {
   document.getElementById('landingPage').classList.remove('hidden');
@@ -484,6 +483,7 @@ function switchToUser() {
   document.getElementById('teacherInterface').classList.add('hidden');
   document.getElementById('adminInterface').classList.add('hidden');
   if (!APP.currentUser) {
+    // auto-login demo user
     const demo = APP.users.find(u => u.email === 'demo@englishlearn.com');
     if (demo) APP.currentUser = demo;
     else {
@@ -516,15 +516,17 @@ function switchToAdmin() {
 }
 
 // ============================================================
-//  USER INTERFACE
+//  USER INTERFACE (index_v1)
 // ============================================================
 let userPlayerState = { currentQuestion: 0, selectedAnswers: {}, timeSpent: 0, timerInterval: null, questions: [], lessonData: null, isSubmitted: false };
 let userCurrentLessonId = null;
 
 function initUserInterface() {
+  // set user name
   const name = APP.currentUser ? APP.currentUser.name : 'Mehmon';
   document.getElementById('userNameDisplay').textContent = name;
   document.getElementById('mobileUserName').textContent = name;
+  // ensure nav active
   document.querySelectorAll('.nav-btn-user').forEach(btn => {
     btn.classList.remove('bg-slate-100', 'font-semibold');
     if (btn.dataset.page === 'dashboard') btn.classList.add('bg-slate-100', 'font-semibold');
@@ -532,6 +534,7 @@ function initUserInterface() {
 }
 
 function navigateUser(page, data = null) {
+  // hide all user pages
   document.querySelectorAll('#userInterface .page-section').forEach(el => el.classList.remove('active'));
   const target = document.getElementById('user-' + page);
   if (target) target.classList.add('active');
@@ -566,7 +569,7 @@ function handleUserLogout() {
   }
 }
 
-// --- User render functions (qisqartirilgan, oldingi versiyalardan olingan) ---
+// ----- user render functions (similar to index_v1) -----
 function renderUserDashboard() {
   if (!APP.currentUser) return;
   const u = APP.currentUser;
@@ -581,6 +584,7 @@ function renderUserDashboard() {
   document.getElementById('xpProgressBar').style.width = pct + '%';
   document.getElementById('xpRemaining').textContent = 'Keyingi daraja uchun ' + (nextLevelXp - (u.xp || 0)) + ' XP qoldi';
 
+  // sections
   const container = document.getElementById('sectionsContainer');
   container.innerHTML = '';
   const sections = [
@@ -609,6 +613,7 @@ function renderUserDashboard() {
     container.appendChild(card);
   });
 
+  // recent activity
   const actContainer = document.getElementById('recentActivity');
   actContainer.innerHTML = '';
   const recent = APP.lessons.filter(l => l.completed).sort((a, b) => b.stars - a.stars).slice(0, 5);
@@ -722,7 +727,7 @@ function renderUserProfile() {
   }
 }
 
-// --- User lesson player ---
+// ----- user lesson player -----
 function getUserQuestions(lessonId) {
   return APP.questions[lessonId] || [
     { id: 'q1', text: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: '4' },
@@ -821,6 +826,7 @@ function renderUserPlayer(data) {
 function userSelectAnswer(qId, opt) {
   if (userPlayerState.isSubmitted) return;
   userPlayerState.selectedAnswers[qId] = opt;
+  // re-render current question
   const q = userPlayerState.questions[userPlayerState.currentQuestion];
   const container = document.getElementById('userOptionsContainer');
   if (!container) return;
@@ -879,6 +885,7 @@ function userSubmitLesson() {
   const xpEarned = stars > 0 ? 10 * stars : 0;
   const coinsEarned = stars > 0 ? 5 * stars : 0;
 
+  // update user
   if (APP.currentUser) {
     APP.currentUser.xp = (APP.currentUser.xp || 0) + xpEarned;
     APP.currentUser.coins = (APP.currentUser.coins || 0) + coinsEarned;
@@ -905,6 +912,7 @@ function userSubmitLesson() {
     }
   }
 
+  // update lesson
   const lesson = APP.lessons.find(l => l.id === userCurrentLessonId);
   if (lesson) {
     lesson.completed = true;
@@ -984,7 +992,9 @@ function viewUserLesson(id) {
 // ============================================================
 let teacherCurrentPage = 'overview';
 
-function initTeacherInterface() {}
+function initTeacherInterface() {
+  // nothing special
+}
 
 function navigateTeacher(page) {
   document.querySelectorAll('#teacherContent .page-section').forEach(el => el.classList.remove('active'));
@@ -1042,7 +1052,9 @@ function renderTeacherLessons() {
   container.innerHTML = html;
 }
 
-function editTeacherLesson(id) { openLessonModal(id); }
+function editTeacherLesson(id) {
+  openLessonModal(id);
+}
 
 function deleteTeacherLesson(id) {
   if (!confirm('Darsni o\'chirishni xohlaysizmi?')) return;
@@ -1097,7 +1109,9 @@ function filterTeacherQuestions() {
   });
 }
 
-function editTeacherQuestion(lessonId, qId) { openQuestionModal(lessonId, qId); }
+function editTeacherQuestion(lessonId, qId) {
+  openQuestionModal(lessonId, qId);
+}
 
 function deleteTeacherQuestion(lessonId, qId) {
   if (!confirm('Savolni o\'chirishni xohlaysizmi?')) return;
@@ -1125,7 +1139,7 @@ function renderTeacherStudents() {
 }
 
 // ============================================================
-//  ADMIN INTERFACE
+//  ADMIN INTERFACE (admin-panel)
 // ============================================================
 let chartInstance = null;
 
@@ -1164,6 +1178,7 @@ function renderAdminDashboard() {
   document.getElementById('adminUserCount').textContent = totalUsers;
   document.getElementById('adminLessonCount').textContent = totalLessons;
 
+  // top users
   const topUsers = [...APP.users].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 5);
   const container = document.getElementById('topUsers');
   container.innerHTML = '';
@@ -1178,6 +1193,7 @@ function renderAdminDashboard() {
     });
   }
 
+  // recent activities
   const actContainer = document.getElementById('recentActivities');
   actContainer.innerHTML = '';
   const recent = APP.lessons.filter(l => l.completed).slice(0, 5);
@@ -1192,6 +1208,7 @@ function renderAdminDashboard() {
     });
   }
 
+  // chart
   if (chartInstance) chartInstance.destroy();
   const ctx = document.getElementById('activityChart').getContext('2d');
   chartInstance = new Chart(ctx, {
@@ -1268,7 +1285,9 @@ function renderAdminLessons() {
   });
 }
 
-function editAdminLesson(id) { openLessonModal(id); }
+function editAdminLesson(id) {
+  openLessonModal(id);
+}
 
 function deleteAdminLesson(id) {
   if (!confirm(`"${id}" darsni o'chirishni xohlaysizmi?`)) return;
@@ -1315,7 +1334,9 @@ function renderAdminQuestions() {
   });
 }
 
-function editAdminQuestion(lessonId, qId) { openQuestionModal(lessonId, qId); }
+function editAdminQuestion(lessonId, qId) {
+  openQuestionModal(lessonId, qId);
+}
 
 function deleteAdminQuestion(lessonId, qId) {
   if (!confirm('Savolni o\'chirishni xohlaysizmi?')) return;
@@ -1512,6 +1533,7 @@ function saveQuestion() {
   }
   saveAppData();
   closeQuestionModal();
+  // refresh views
   if (!document.getElementById('landingPage').classList.contains('hidden')) { /* landing */ }
   else if (!document.getElementById('userInterface').classList.contains('hidden')) { /* user questions not shown */ }
   else if (!document.getElementById('teacherInterface').classList.contains('hidden')) { filterTeacherQuestions(); }
@@ -1527,6 +1549,7 @@ function populateQuestionLessonDropdown() {
     opt.textContent = `${l.title} (${l.section})`;
     select.appendChild(opt);
   });
+  // also filter dropdown in admin
   const filterSelect = document.getElementById('questionLessonFilter');
   if (filterSelect) {
     filterSelect.innerHTML = '<option value="all">Barcha darslar</option>';
@@ -1543,8 +1566,9 @@ function populateQuestionLessonDropdown() {
 //  INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
+  // load data
   loadAppData();
-  // particles
+  // create particles
   const particlesContainer = document.getElementById('particles');
   for (let i = 0; i < 40; i++) {
     const p = document.createElement('div');
@@ -1556,11 +1580,37 @@ document.addEventListener('DOMContentLoaded', function() {
     p.style.animationDelay = (Math.random() * 15) + 's';
     particlesContainer.appendChild(p);
   }
+
+  // default: show landing
   switchToLanding();
 
-  // Auto-fill missing user page sections if empty
-  document.querySelectorAll('#userInterface .page-section').forEach(el => {
-    if (el.id === 'user-dashboard' && !el.querySelector('#sectionsContainer')) {
+  console.log('✅ EnglishLearn 3-in-1 platform ishga tushdi!');
+  console.log('📊 Ma\'lumotlar:', APP);
+});
+
+// Close modals on ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeLessonModal();
+    closeQuestionModal();
+  }
+});
+
+// Click outside modal to close
+document.getElementById('lessonModal').addEventListener('click', function(e) {
+  if (e.target === this) closeLessonModal();
+});
+document.getElementById('questionModal').addEventListener('click', function(e) {
+  if (e.target === this) closeQuestionModal();
+});
+
+// fix missing elements in user interface (injected via JS but we need placeholders)
+// We'll dynamically create them if missing (but they are already in HTML)
+// Ensure all user page sections exist
+document.querySelectorAll('#userInterface .page-section').forEach(el => {
+  if (el.id === 'user-dashboard') {
+    // if empty, fill with basic structure
+    if (!el.querySelector('#sectionsContainer')) {
       el.innerHTML = `
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div><h1 class="text-2xl font-bold text-slate-800">👋 Salom, <span id="dashUserName">Mehmon</span></h1><p class="text-slate-500">Bugungi o‘quv rejangizni davom eting</p></div>
@@ -1581,104 +1631,43 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5"><h3 class="font-semibold text-slate-800 mb-3">📊 So‘nggi faoliyat</h3><div id="recentActivity" class="space-y-3"></div></div>
       `;
     }
-    if (el.id === 'user-lessons' && !el.querySelector('#lessonsTableBody')) {
-      el.innerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-          <h2 class="text-2xl font-bold text-slate-800">📖 Barcha darslar</h2>
-          <div class="flex gap-2 mt-2 sm:mt-0" id="sectionFilter">
-            <button class="filter-btn px-4 py-2 text-sm bg-blue-600 text-white rounded-lg" data-section="all">Hammasi</button>
-            <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="BEGINNER">Beginner</button>
-            <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="ELEMENTARY">Elementary</button>
-            <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="IELTS">IELTS</button>
-          </div>
+  }
+  if (el.id === 'user-lessons' && !el.querySelector('#lessonsTableBody')) {
+    el.innerHTML = `
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h2 class="text-2xl font-bold text-slate-800">📖 Barcha darslar</h2>
+        <div class="flex gap-2 mt-2 sm:mt-0" id="sectionFilter">
+          <button class="filter-btn px-4 py-2 text-sm bg-blue-600 text-white rounded-lg" data-section="all">Hammasi</button>
+          <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="BEGINNER">Beginner</button>
+          <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="ELEMENTARY">Elementary</button>
+          <button class="filter-btn px-4 py-2 text-sm border border-slate-200 rounded-lg hover:bg-slate-50" data-section="IELTS">IELTS</button>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50 text-slate-600 border-b"><tr><th class="px-5 py-3 text-left font-medium">Dars</th><th class="px-5 py-3 text-left font-medium">Bo‘lim</th><th class="px-5 py-3 text-left font-medium">Holat</th><th class="px-5 py-3 text-left font-medium">Yulduzlar</th><th class="px-5 py-3 text-left font-medium"></th></tr></thead><tbody id="lessonsTableBody"></tbody></table></div>
-      `;
-      el.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() { filterUserLessons(this.dataset.section); });
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50 text-slate-600 border-b"><tr><th class="px-5 py-3 text-left font-medium">Dars</th><th class="px-5 py-3 text-left font-medium">Bo‘lim</th><th class="px-5 py-3 text-left font-medium">Holat</th><th class="px-5 py-3 text-left font-medium">Yulduzlar</th><th class="px-5 py-3 text-left font-medium"></th></tr></thead><tbody id="lessonsTableBody"></tbody></table></div>
+    `;
+    // re-bind filter events
+    el.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        filterUserLessons(this.dataset.section);
       });
-    }
-    if (el.id === 'user-leaderboard' && !el.querySelector('#leaderboardList')) {
-      el.innerHTML = `<h2 class="text-2xl font-bold text-slate-800 mb-4">🏆 Reyting</h2><div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5"><div id="leaderboardList" class="space-y-3"></div></div>`;
-    }
-    if (el.id === 'user-profile' && !el.querySelector('#profileName')) {
-      el.innerHTML = `
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="md:col-span-1"><div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 text-center"><div class="relative inline-block"><div class="w-28 h-28 rounded-full bg-blue-100 flex items-center justify-center text-4xl text-blue-600 mx-auto avatar-ring"><i class="fas fa-user"></i></div><span class="absolute bottom-1 right-1 bg-green-500 border-2 border-white rounded-full w-4 h-4"></span></div><h3 class="mt-3 text-xl font-bold text-slate-800" id="profileName">Mehmon</h3><p class="text-sm text-slate-500" id="profileEmail">mehmon@email.com</p><div class="mt-4 flex justify-center gap-2"><span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full" id="profileLevel">Daraja 1</span><span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full" id="profileStatus">FREE</span></div><hr class="my-4" /><div class="text-left space-y-2 text-sm"><div class="flex justify-between"><span class="text-slate-500">Umumiy XP</span><span class="font-medium" id="profileXp">0</span></div><div class="flex justify-between"><span class="text-slate-500">Tangalar</span><span class="font-medium" id="profileCoins">0</span></div><div class="flex justify-between"><span class="text-slate-500">Streak</span><span class="font-medium" id="profileStreak">0 kun</span></div><div class="flex justify-between"><span class="text-slate-500">Yakunlangan darslar</span><span class="font-medium" id="profileCompleted">0</span></div></div><button class="mt-4 w-full py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition text-sm" onclick="resetUserProgress()">Progressni tiklash</button></div></div>
-          <div class="md:col-span-2"><div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6"><h4 class="font-semibold text-slate-800 mb-4">📈 Statistika</h4><div class="grid grid-cols-2 gap-4"><div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">O‘rtacha ball</p><p class="text-2xl font-bold text-slate-800" id="profileAvgScore">0%</p></div><div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Eng yaxshi natija</p><p class="text-2xl font-bold text-slate-800" id="profileBestStars">0⭐</p></div><div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Jami vaqt</p><p class="text-2xl font-bold text-slate-800" id="profileTotalTime">0 min</p></div><div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Yutuqlar</p><p class="text-2xl font-bold text-slate-800" id="profileAchievements">0</p></div></div><div class="mt-6"><h5 class="font-medium text-slate-700 mb-2">Zaif tomonlar</h5><div class="flex flex-wrap gap-2" id="weakPoints"><span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">Hali ma'lumot yo'q</span></div></div></div></div>
-        </div>
-      `;
-    }
-    if (el.id === 'user-player') el.innerHTML = '';
-    if (el.id === 'user-result') el.innerHTML = '';
-  });
-
-  document.querySelectorAll('#adminInterface .page-section').forEach(el => {
-    if (el.id === 'admin-dashboard' && !el.querySelector('#statUsers')) {
-      el.innerHTML = `
-        <h2 class="text-2xl font-bold text-slate-800 mb-6">📊 Dashboard</h2>
-        <div class="grid-stats mb-6">
-          <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500">Jami foydalanuvchilar</p><p class="text-2xl font-bold text-slate-800" id="statUsers">0</p></div><div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-users text-xl"></i></div></div></div>
-          <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500">Jami darslar</p><p class="text-2xl font-bold text-slate-800" id="statLessons">0</p></div><div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i class="fas fa-book text-xl"></i></div></div></div>
-          <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500">Jami savollar</p><p class="text-2xl font-bold text-slate-800" id="statQuestions">0</p></div><div class="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-question-circle text-xl"></i></div></div></div>
-          <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500">Yakunlangan darslar</p><p class="text-2xl font-bold text-slate-800" id="statCompleted">0</p></div><div class="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600"><i class="fas fa-check-circle text-xl"></i></div></div></div>
-        </div>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div class="bg-white rounded-xl shadow-sm p-5 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">📈 Faollik grafigi</h3><canvas id="activityChart" height="200"></canvas></div>
-          <div class="bg-white rounded-xl shadow-sm p-5 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">🏆 Top foydalanuvchilar</h3><div id="topUsers" class="space-y-3"></div></div>
-        </div>
-        <div class="mt-6 bg-white rounded-xl shadow-sm p-5 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">📋 So'nggi faoliyatlar</h3><div id="recentActivities" class="space-y-2"></div></div>
-      `;
-    }
-    if (el.id === 'admin-users' && !el.querySelector('#usersTableBody')) {
-      el.innerHTML = `
-        <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
-          <h2 class="text-2xl font-bold text-slate-800">👥 Foydalanuvchilar</h2>
-          <div class="flex gap-3 flex-wrap">
-            <input type="text" id="userSearch" placeholder="Foydalanuvchi qidirish..." class="admin-input w-48" oninput="renderAdminUsers()" />
-            <button class="admin-btn admin-btn-danger" onclick="confirmDeleteAllUsers()"><i class="fas fa-trash"></i> Hammasini o'chirish</button>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"><div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>#</th><th>Ism</th><th>Email</th><th>XP</th><th>Daraja</th><th>Tangalar</th><th>Streak</th><th>Darslar</th><th>Amallar</th></tr></thead><tbody id="usersTableBody"></tbody></table></div></div>
-      `;
-    }
-    if (el.id === 'admin-lessons' && !el.querySelector('#lessonsTableBodyAdmin')) {
-      el.innerHTML = `
-        <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
-          <h2 class="text-2xl font-bold text-slate-800">📖 Darslar</h2>
-          <button class="admin-btn admin-btn-primary" onclick="openLessonModal()"><i class="fas fa-plus"></i> Yangi dars</button>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"><div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>ID</th><th>Nomi</th><th>Bo'lim</th><th>Bosqich</th><th>Holat</th><th>Savollar</th><th>Amallar</th></tr></thead><tbody id="lessonsTableBodyAdmin"></tbody></table></div></div>
-      `;
-    }
-    if (el.id === 'admin-questions' && !el.querySelector('#questionsList')) {
-      el.innerHTML = `
-        <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
-          <h2 class="text-2xl font-bold text-slate-800">❓ Savollar</h2>
-          <div class="flex gap-3 flex-wrap">
-            <select id="questionLessonFilter" class="admin-select w-48" onchange="renderAdminQuestions()"><option value="all">Barcha darslar</option></select>
-            <button class="admin-btn admin-btn-primary" onclick="openQuestionModal()"><i class="fas fa-plus"></i> Yangi savol</button>
-          </div>
-        </div>
-        <div id="questionsList" class="space-y-3"></div>
-      `;
-    }
-    if (el.id === 'admin-settings' && !el.querySelector('#settingSiteName')) {
-      el.innerHTML = `
-        <h2 class="text-2xl font-bold text-slate-800 mb-6">⚙️ Sozlamalar</h2>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">Tizim sozlamalari</h3><div class="space-y-4"><div><label class="block text-sm font-medium text-slate-700 mb-1">Sayt nomi</label><input type="text" id="settingSiteName" class="admin-input" value="EnglishLearn" /></div><div><label class="block text-sm font-medium text-slate-700 mb-1">Darslar soni (sahifada)</label><input type="number" id="settingLessonsPerPage" class="admin-input" value="10" /></div><div><label class="block text-sm font-medium text-slate-700 mb-1">Maksimal savollar soni</label><input type="number" id="settingMaxQuestions" class="admin-input" value="20" /></div><button class="admin-btn admin-btn-primary w-full" onclick="saveSettings()">Saqlash</button></div></div>
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">Ma'lumotlar</h3><div class="space-y-3"><button class="admin-btn admin-btn-success w-full" onclick="exportData()"><i class="fas fa-download"></i> Ma'lumotlarni eksport qilish</button><button class="admin-btn admin-btn-warning w-full" onclick="importData()"><i class="fas fa-upload"></i> Ma'lumotlarni import qilish</button><button class="admin-btn admin-btn-danger w-full" onclick="if(confirm('Barcha ma\'lumotlarni o\'chirishni xohlaysizmi?')) clearAllData()"><i class="fas fa-trash"></i> Barcha ma'lumotlarni o'chirish</button></div></div>
-        </div>
-      `;
-    }
-  });
-
-  console.log('✅ EnglishLearn 3-in-1 platform ishga tushdi!');
-  console.log('📊 Ma\'lumotlar:', APP);
+    });
+  }
+  if (el.id === 'user-leaderboard' && !el.querySelector('#leaderboardList')) {
+    el.innerHTML = `<h2 class="text-2xl font-bold text-slate-800 mb-4">🏆 Reyting</h2><div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5"><div id="leaderboardList" class="space-y-3"></div></div>`;
+  }
+  if (el.id === 'user-profile' && !el.querySelector('#profileName')) {
+    el.innerHTML = `
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="md:col-span-1"><div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 text-center"><div class="relative inline-block"><div class="w-28 h-28 rounded-full bg-blue-100 flex items-center justify-center text-4xl text-blue-600 mx-auto avatar-ring"><i class="fas fa-user"></i></div><span class="absolute bottom-1 right-1 bg-green-500 border-2 border-white rounded-full w-4 h-4"></span></div><h3 class="mt-3 text-xl font-bold text-slate-800" id="profileName">Mehmon</h3><p class="text-sm text-slate-500" id="profileEmail">mehmon@email.com</p><div class="mt-4 flex justify-center gap-2"><span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full" id="profileLevel">Daraja 1</span><span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full" id="profileStatus">FREE</span></div><hr class="my-4" /><div class="text-left space-y-2 text-sm"><div class="flex justify-between"><span class="text-slate-500">Umumiy XP</span><span class="font-medium" id="profileXp">0</span></div><div class="flex justify-between"><span class="text-slate-500">Tangalar</span><span class="font-medium" id="profileCoins">0</span></div><div class="flex justify-between"><span class="text-slate-500">Streak</span><span class="font-medium" id="profileStreak">0 kun</span></div><div class="flex justify-between"><span class="text-slate-500">Yakunlangan darslar</span><span class="font-medium" id="profileCompleted">0</span></div></div><button class="mt-4 w-full py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition text-sm" onclick="resetUserProgress()">Progressni tiklash</button></div></div>
+        <div class="md:col-span-2"><div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6"><h4 class="font-semibold text-slate-800 mb-4">📈 Statistika</h4><div class="grid grid-cols-2 gap-4"><div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">O‘rtacha ball</p><p class="text-2xl font-bold text-slate-800" id="profileAvgScore">0%</p></div><div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Eng yaxshi natija</p><p class="text-2xl font-bold text-slate-800" id="profileBestStars">0⭐</p></div><div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Jami vaqt</p><p class="text-2xl font-bold text-slate-800" id="profileTotalTime">0 min</p></div><div class="bg-slate-50 p-4 rounded-lg"><p class="text-sm text-slate-500">Yutuqlar</p><p class="text-2xl font-bold text-slate-800" id="profileAchievements">0</p></div></div><div class="mt-6"><h5 class="font-medium text-slate-700 mb-2">Zaif tomonlar</h5><div class="flex flex-wrap gap-2" id="weakPoints"><span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">Hali ma'lumot yo'q</span></div></div></div></div>
+      </div>
+    `;
+  }
+  // player and result are empty, they get filled by JS
+  if (el.id === 'user-player') el.innerHTML = '';
+  if (el.id === 'user-result') el.innerHTML = '';
 });
 
-// Reset user progress
 function resetUserProgress() {
   if (!APP.currentUser) { showToast('Iltimos, avval tizimga kiring', 'error'); return; }
   if (!confirm('Progressni tiklashni xohlaysizmi? Bu amalni qaytarib bo\'lmaydi!')) return;
@@ -1700,6 +1689,73 @@ function resetUserProgress() {
   showToast('Progress tiklandi', 'info');
 }
 
+// Admin dashboard missing elements - fill them
+document.querySelectorAll('#adminInterface .page-section').forEach(el => {
+  if (el.id === 'admin-dashboard' && !el.querySelector('#statUsers')) {
+    el.innerHTML = `
+      <h2 class="text-2xl font-bold text-slate-800 mb-6">📊 Dashboard</h2>
+      <div class="grid-stats mb-6">
+        <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500">Jami foydalanuvchilar</p><p class="text-2xl font-bold text-slate-800" id="statUsers">0</p></div><div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-users text-xl"></i></div></div></div>
+        <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500">Jami darslar</p><p class="text-2xl font-bold text-slate-800" id="statLessons">0</p></div><div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i class="fas fa-book text-xl"></i></div></div></div>
+        <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500">Jami savollar</p><p class="text-2xl font-bold text-slate-800" id="statQuestions">0</p></div><div class="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-question-circle text-xl"></i></div></div></div>
+        <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500">Yakunlangan darslar</p><p class="text-2xl font-bold text-slate-800" id="statCompleted">0</p></div><div class="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600"><i class="fas fa-check-circle text-xl"></i></div></div></div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">📈 Faollik grafigi</h3><canvas id="activityChart" height="200"></canvas></div>
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">🏆 Top foydalanuvchilar</h3><div id="topUsers" class="space-y-3"></div></div>
+      </div>
+      <div class="mt-6 bg-white rounded-xl shadow-sm p-5 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">📋 So'nggi faoliyatlar</h3><div id="recentActivities" class="space-y-2"></div></div>
+    `;
+  }
+  if (el.id === 'admin-users' && !el.querySelector('#usersTableBody')) {
+    el.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+        <h2 class="text-2xl font-bold text-slate-800">👥 Foydalanuvchilar</h2>
+        <div class="flex gap-3 flex-wrap">
+          <input type="text" id="userSearch" placeholder="Foydalanuvchi qidirish..." class="admin-input w-48" oninput="filterAdminUsers()" />
+          <button class="admin-btn admin-btn-danger" onclick="confirmDeleteAllUsers()"><i class="fas fa-trash"></i> Hammasini o'chirish</button>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"><div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>#</th><th>Ism</th><th>Email</th><th>XP</th><th>Daraja</th><th>Tangalar</th><th>Streak</th><th>Darslar</th><th>Amallar</th></tr></thead><tbody id="usersTableBody"></tbody></table></div></div>
+    `;
+  }
+  if (el.id === 'admin-lessons' && !el.querySelector('#lessonsTableBodyAdmin')) {
+    el.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+        <h2 class="text-2xl font-bold text-slate-800">📖 Darslar</h2>
+        <button class="admin-btn admin-btn-primary" onclick="openLessonModal()"><i class="fas fa-plus"></i> Yangi dars</button>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"><div class="overflow-x-auto"><table class="admin-table"><thead><tr><th>ID</th><th>Nomi</th><th>Bo'lim</th><th>Bosqich</th><th>Holat</th><th>Savollar</th><th>Amallar</th></tr></thead><tbody id="lessonsTableBodyAdmin"></tbody></table></div></div>
+    `;
+  }
+  if (el.id === 'admin-questions' && !el.querySelector('#questionsList')) {
+    el.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+        <h2 class="text-2xl font-bold text-slate-800">❓ Savollar</h2>
+        <div class="flex gap-3 flex-wrap">
+          <select id="questionLessonFilter" class="admin-select w-48" onchange="filterAdminQuestions()"><option value="all">Barcha darslar</option></select>
+          <button class="admin-btn admin-btn-primary" onclick="openQuestionModal()"><i class="fas fa-plus"></i> Yangi savol</button>
+        </div>
+      </div>
+      <div id="questionsList" class="space-y-3"></div>
+    `;
+  }
+  if (el.id === 'admin-settings' && !el.querySelector('#settingSiteName')) {
+    el.innerHTML = `
+      <h2 class="text-2xl font-bold text-slate-800 mb-6">⚙️ Sozlamalar</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">Tizim sozlamalari</h3><div class="space-y-4"><div><label class="block text-sm font-medium text-slate-700 mb-1">Sayt nomi</label><input type="text" id="settingSiteName" class="admin-input" value="EnglishLearn" /></div><div><label class="block text-sm font-medium text-slate-700 mb-1">Darslar soni (sahifada)</label><input type="number" id="settingLessonsPerPage" class="admin-input" value="10" /></div><div><label class="block text-sm font-medium text-slate-700 mb-1">Maksimal savollar soni</label><input type="number" id="settingMaxQuestions" class="admin-input" value="20" /></div><button class="admin-btn admin-btn-primary w-full" onclick="saveSettings()">Saqlash</button></div></div>
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100"><h3 class="font-semibold text-slate-800 mb-4">Ma'lumotlar</h3><div class="space-y-3"><button class="admin-btn admin-btn-success w-full" onclick="exportData()"><i class="fas fa-download"></i> Ma'lumotlarni eksport qilish</button><button class="admin-btn admin-btn-warning w-full" onclick="importData()"><i class="fas fa-upload"></i> Ma'lumotlarni import qilish</button><button class="admin-btn admin-btn-danger w-full" onclick="if(confirm('Barcha ma\'lumotlarni o\'chirishni xohlaysizmi?')) clearAllData()"><i class="fas fa-trash"></i> Barcha ma'lumotlarni o'chirish</button></div></div>
+      </div>
+    `;
+  }
+});
+
+// Admin filter functions
+function filterAdminUsers() {
+  // not used in this simplified version
+  renderAdminUsers();
+}
 function confirmDeleteAllUsers() {
   if (!confirm('Barcha foydalanuvchilarni o\'chirishni xohlaysizmi? Bu amalni qaytarib bo\'lmaydi!')) return;
   APP.users = [];
@@ -1708,25 +1764,28 @@ function confirmDeleteAllUsers() {
   renderAdminDashboard();
   showToast('Barcha foydalanuvchilar o\'chirildi', 'warning');
 }
+function filterAdminQuestions() {
+  renderAdminQuestions();
+}
 
-// Close modals on ESC
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    closeLessonModal();
-    closeQuestionModal();
-  }
-});
-document.getElementById('lessonModal').addEventListener('click', function(e) {
-  if (e.target === this) closeLessonModal();
-});
-document.getElementById('questionModal').addEventListener('click', function(e) {
-  if (e.target === this) closeQuestionModal();
-});
+// Teacher filter questions
+function filterTeacherQuestions() {
+  // implemented above
+}
 
-// Re-populate dropdowns after changes
+// Additional function to re-populate dropdowns after changes
 function populateAllDropdowns() {
   populateQuestionLessonDropdown();
 }
+
+// Override for teacher question filter change
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'teacherQuestionFilter') {
+    filterTeacherQuestions();
+  }
+});
+
+console.log('✅ 3-in-1 platform fully loaded!');
 </script>
 
 </body>

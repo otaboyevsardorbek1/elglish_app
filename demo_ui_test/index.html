@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnglishLearn — 3-in-1 Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container-custom { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
+        
+        .platform-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .platform-card:hover {
+            transform: translateY(-12px) scale(1.01);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            border-color: #fff;
+        }
+        .platform-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .platform-card:hover::before {
+            opacity: 1;
+        }
+        
+        .platform-card .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .platform-card:hover .icon-wrapper {
+            transform: scale(1.1) rotate(-5deg);
+        }
+        
+        .platform-card .badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .platform-card .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        .platform-card .feature-list li {
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .platform-card .feature-list li i {
+            width: 20px;
+            color: #667eea;
+        }
+        
+        .platform-card .btn-platform {
+            margin-top: auto;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            font-size: 1rem;
+        }
+        .platform-card .btn-platform:hover {
+            transform: scale(1.02);
+        }
+        
+        .card-user { border-top: 4px solid #3b82f6; }
+        .card-user .icon-wrapper { background: #dbeafe; color: #3b82f6; }
+        .card-user .badge { background: #dbeafe; color: #3b82f6; }
+        .card-user .btn-platform { background: #3b82f6; color: white; }
+        .card-user .btn-platform:hover { background: #2563eb; box-shadow: 0 8px 25px rgba(59,130,246,0.4); }
+        
+        .card-admin { border-top: 4px solid #ef4444; }
+        .card-admin .icon-wrapper { background: #fee2e2; color: #ef4444; }
+        .card-admin .badge { background: #fee2e2; color: #ef4444; }
+        .card-admin .btn-platform { background: #ef4444; color: white; }
+        .card-admin .btn-platform:hover { background: #dc2626; box-shadow: 0 8px 25px rgba(239,68,68,0.4); }
+        
+        .card-teacher { border-top: 4px solid #22c55e; }
+        .card-teacher .icon-wrapper { background: #dcfce7; color: #22c55e; }
+        .card-teacher .badge { background: #dcfce7; color: #22c55e; }
+        .card-teacher .btn-platform { background: #22c55e; color: white; }
+        .card-teacher .btn-platform:hover { background: #16a34a; box-shadow: 0 8px 25px rgba(34,197,94,0.4); }
+        
+        .header-title {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .header-title h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .header-title p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .footer-text {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-top: 3rem;
+            font-size: 0.9rem;
+        }
+        
+        .modal-bg {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .stats-mini {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 1rem 0;
+        }
+        .stats-mini .stat-item {
+            text-align: center;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+        .stats-mini .stat-item .number {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .stats-mini .stat-item .label {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+        
+        @media (max-width: 768px) {
+            .header-title h1 { font-size: 2rem; }
+            .platform-card { min-height: 300px; padding: 1.5rem; }
+            .stats-mini { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            animation: particleFloat 20s infinite linear;
+        }
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Particles Background -->
+<div class="particles" id="particles"></div>
+
+<div class="container-custom relative z-10">
+
+    <!-- Header -->
+    <div class="header-title float-animation">
+        <h1>📚 EnglishLearn</h1>
+        <p>3-in-1 platform — Foydalanuvchi, O'qituvchi va Admin interfeyslari</p>
+        <div class="flex justify-center gap-4 mt-4 flex-wrap">
+            <span class="px-4 py-1.5 bg-white/20 rounded-full text-white text-sm backdrop-blur-sm">
+                <i class="fas fa-users mr-2"></i> 3 rol
+            </span>
+            <span class="px-4 py-1.5 bg-white/20 rounded-full text-white text-sm backdrop-blur-sm">
+                <i class="fas fa-rocket mr-2"></i> 10+ darslar
+            </span>
+            <span class="px-4 py-1.5 bg-white/20 rounded-full text-white text-sm backdrop-blur-sm">
+                <i class="fas fa-star mr-2"></i> Interaktiv
+            </span>
+        </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="grid md:grid-cols-3 gap-8">
+
+        <!-- User Card -->
+        <div class="platform-card card-user" onclick="openPlatform('user')">
+            <span class="badge"><i class="fas fa-users mr-1"></i> Asosiy</span>
+            <div class="icon-wrapper">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">👤 Foydalanuvchi</h3>
+            <p class="text-slate-500 text-sm mt-1">O'quvchi interfeysi</p>
+            
+            <div class="stats-mini">
+                <div class="stat-item">
+                    <div class="number">10</div>
+                    <div class="label">Darslar</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">4</div>
+                    <div class="label">Yakunlangan</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">⭐3</div>
+                    <div class="label">Eng yaxshi</div>
+                </div>
+            </div>
+
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> Darslarni o'rganish</li>
+                <li><i class="fas fa-check-circle"></i> Test topshirish</li>
+                <li><i class="fas fa-check-circle"></i> Reytingda qatnashish</li>
+                <li><i class="fas fa-check-circle"></i> Yutuqlar va tangalar</li>
+                <li><i class="fas fa-check-circle"></i> Shaxsiy profil</li>
+            </ul>
+
+            <button class="btn-platform">
+                <i class="fas fa-arrow-right"></i> Foydalanuvchi sifatida kirish
+            </button>
+        </div>
+
+        <!-- Teacher Card -->
+        <div class="platform-card card-teacher" onclick="openPlatform('teacher')">
+            <span class="badge"><i class="fas fa-chalkboard-teacher mr-1"></i> O'qituvchi</span>
+            <div class="icon-wrapper">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">🧑‍🏫 O'qituvchi</h3>
+            <p class="text-slate-500 text-sm mt-1">Dars yaratish va boshqarish</p>
+            
+            <div class="stats-mini">
+                <div class="stat-item">
+                    <div class="number">5</div>
+                    <div class="label">Darslar</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">12</div>
+                    <div class="label">Savollar</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">8</div>
+                    <div class="label">O'quvchilar</div>
+                </div>
+            </div>
+
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> Darslar yaratish</li>
+                <li><i class="fas fa-check-circle"></i> Savollar qo'shish</li>
+                <li><i class="fas fa-check-circle"></i> O'quvchilarni kuzatish</li>
+                <li><i class="fas fa-check-circle"></i> Baholash tizimi</li>
+                <li><i class="fas fa-check-circle"></i> Hisobotlar</li>
+            </ul>
+
+            <button class="btn-platform">
+                <i class="fas fa-arrow-right"></i> O'qituvchi sifatida kirish
+            </button>
+        </div>
+
+        <!-- Admin Card -->
+        <div class="platform-card card-admin" onclick="openPlatform('admin')">
+            <span class="badge"><i class="fas fa-shield-alt mr-1"></i> Admin</span>
+            <div class="icon-wrapper">
+                <i class="fas fa-user-cog"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">🔧 Admin</h3>
+            <p class="text-slate-500 text-sm mt-1">To'liq boshqaruv paneli</p>
+            
+            <div class="stats-mini">
+                <div class="stat-item">
+                    <div class="number">15</div>
+                    <div class="label">Foydalanuvchilar</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">10</div>
+                    <div class="label">Darslar</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">25</div>
+                    <div class="label">Savollar</div>
+                </div>
+            </div>
+
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> To'liq boshqaruv paneli</li>
+                <li><i class="fas fa-check-circle"></i> Foydalanuvchilarni boshqarish</li>
+                <li><i class="fas fa-check-circle"></i> Dars va savollar</li>
+                <li><i class="fas fa-check-circle"></i> Statistika va grafiklar</li>
+                <li><i class="fas fa-check-circle"></i> Eksport/Import</li>
+            </ul>
+
+            <button class="btn-platform">
+                <i class="fas fa-arrow-right"></i> Admin sifatida kirish
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-text">
+        <p>© 2026 EnglishLearn — Barcha huquqlar himoyalangan</p>
+        <p class="text-xs mt-1">3-in-1 platform: Foydalanuvchi · O'qituvchi · Admin</p>
+    </div>
+
+</div>
+
+<!-- ==================== MODAL ==================== -->
+<div id="platformModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-8 w-full max-w-2xl shadow-2xl relative animate-[fadeIn_0.3s_ease] max-h-[90vh] overflow-y-auto">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl transition">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div id="modalContent">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95) translateY(20px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-content-section {
+        animation: fadeIn 0.3s ease;
+    }
+    .code-block {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 16px;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        overflow-x: auto;
+        margin: 12px 0;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .code-block .comment { color: #94a3b8; }
+    .code-block .string { color: #86efac; }
+    .code-block .keyword { color: #93c5fd; }
+    .code-block .function { color: #fcd34d; }
+</style>
+
+<script>
+    // ============================================================
+    //  PARTICLES
+    // ============================================================
+    (function createParticles() {
+        const container = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.width = (Math.random() * 4 + 2) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.animationDuration = (15 + Math.random() * 20) + 's';
+            particle.style.animationDelay = (Math.random() * 10) + 's';
+            container.appendChild(particle);
+        }
+    })();
+
+    // ============================================================
+    //  PLATFORM DATA
+    // ============================================================
+    const platforms = {
+        user: {
+            title: '👤 Foydalanuvchi interfeysi',
+            icon: 'fa-user-graduate',
+            color: '#3b82f6',
+            description: 'O\'quvchilar uchun to\'liq ta\'lim platformasi',
+            features: [
+                '📚 10+ interaktiv darslar',
+                '❓ 20+ test savollari',
+                '⭐ Yulduzli baholash tizimi',
+                '🪙 Tangalar va yutuqlar',
+                '🏆 Reyting jadvali',
+                '📊 Shaxsiy progress'
+            ],
+            code: `// Foydalanuvchi interfeysi asosiy funksiyalari
+class UserInterface {
+    constructor() {
+        this.lessons = [];
+        this.progress = { xp: 0, level: 1 };
+        this.streak = 0;
+    }
+    
+    startLesson(lessonId) {
+        // Darsni boshlash
+        this.currentLesson = lessonId;
+        this.loadQuestions(lessonId);
+    }
+    
+    submitAnswer(questionId, answer) {
+        // Javobni tekshirish
+        const correct = this.checkAnswer(questionId, answer);
+        if (correct) this.addXP(10);
+        return correct;
+    }
+    
+    getStats() {
+        return {
+            xp: this.progress.xp,
+            level: this.progress.level,
+            streak: this.streak,
+            completedLessons: this.lessons.filter(l => l.completed).length
+        };
+    }
+}`,
+            stats: {
+                lessons: 10,
+                completed: 4,
+                bestStars: 3,
+                xp: 320,
+                coins: 145,
+                streak: 7
+            },
+            quickActions: [
+                { icon: 'fa-play', label: 'Davom etish', action: 'continueLearning' },
+                { icon: 'fa-list', label: 'Barcha darslar', action: 'viewLessons' },
+                { icon: 'fa-trophy', label: 'Reyting', action: 'viewLeaderboard' }
+            ]
+        },
+        
+        teacher: {
+            title: '🧑‍🏫 O\'qituvchi interfeysi',
+            icon: 'fa-chalkboard-teacher',
+            color: '#22c55e',
+            description: 'O\'qituvchilar uchun dars yaratish va boshqarish',
+            features: [
+                '📝 Darslar yaratish va tahrirlash',
+                '❓ Savollar qo\'shish tizimi',
+                '👨‍🎓 O\'quvchilarni kuzatish',
+                '📊 Baholash va hisobotlar',
+                '📈 O\'quvchilar statistikasi',
+                '🔔 Yangiliklar va eslatmalar'
+            ],
+            code: `// O'qituvchi interfeysi asosiy funksiyalari
+class TeacherInterface {
+    constructor() {
+        this.courses = [];
+        this.students = [];
+        this.questions = {};
+    }
+    
+    createLesson(title, section, stage) {
+        // Yangi dars yaratish
+        const lesson = {
+            id: 'l' + Date.now().toString(36),
+            title,
+            section,
+            stage,
+            createdAt: new Date()
+        };
+        this.courses.push(lesson);
+        return lesson;
+    }
+    
+    addQuestion(lessonId, questionData) {
+        // Savol qo'shish
+        if (!this.questions[lessonId]) {
+            this.questions[lessonId] = [];
+        }
+        this.questions[lessonId].push({
+            id: 'q' + Date.now().toString(36),
+            ...questionData
+        });
+    }
+    
+    getStudentProgress(studentId) {
+        // O'quvchi progressini ko'rish
+        return this.students.find(s => s.id === studentId);
+    }
+}`,
+            stats: {
+                lessons: 5,
+                questions: 12,
+                students: 8,
+                averageScore: 76,
+                completionRate: 68
+            },
+            quickActions: [
+                { icon: 'fa-plus', label: 'Yangi dars', action: 'createLesson' },
+                { icon: 'fa-question', label: 'Savol qo\'shish', action: 'addQuestion' },
+                { icon: 'fa-users', label: 'O\'quvchilar', action: 'viewStudents' }
+            ]
+        },
+        
+        admin: {
+            title: '🔧 Admin panel',
+            icon: 'fa-user-cog',
+            color: '#ef4444',
+            description: 'To\'liq boshqaruv paneli — tizimni nazorat qilish',
+            features: [
+                '📊 Real vaqt statistikasi',
+                '👥 Foydalanuvchilarni boshqarish',
+                '📚 Darslar va savollar CRUD',
+                '📈 Grafiklar va analitika',
+                '⚙️ Tizim sozlamalari',
+                '💾 Eksport/Import funksiyalari'
+            ],
+            code: `// Admin panel asosiy funksiyalari
+class AdminPanel {
+    constructor() {
+        this.users = [];
+        this.lessons = [];
+        this.settings = {};
+    }
+    
+    manageUsers() {
+        // Foydalanuvchilarni boshqarish
+        return {
+            list: () => this.users,
+            delete: (userId) => this.users.filter(u => u.id !== userId),
+            update: (userId, data) => this.users.map(u => 
+                u.id === userId ? { ...u, ...data } : u
+            )
+        };
+    }
+    
+    getStats() {
+        // Umumiy statistika
+        return {
+            totalUsers: this.users.length,
+            totalLessons: this.lessons.length,
+            totalQuestions: this.lessons.reduce((sum, l) => 
+                sum + (l.questions?.length || 0), 0
+            ),
+            completedLessons: this.lessons.filter(l => l.completed).length
+        };
+    }
+    
+    exportData() {
+        // Ma'lumotlarni eksport qilish
+        return JSON.stringify({
+            users: this.users,
+            lessons: this.lessons,
+            settings: this.settings
+        });
+    }
+}`,
+            stats: {
+                users: 15,
+                lessons: 10,
+                questions: 25,
+                completed: 42,
+                activeUsers: 8
+            },
+            quickActions: [
+                { icon: 'fa-users', label: 'Foydalanuvchilar', action: 'manageUsers' },
+                { icon: 'fa-book', label: 'Darslar', action: 'manageLessons' },
+                { icon: 'fa-cog', label: 'Sozlamalar', action: 'manageSettings' }
+            ]
+        }
+    };
+
+    // ============================================================
+    //  MODAL FUNCTIONS
+    // ============================================================
+    function openPlatform(type) {
+        const data = platforms[type];
+        if (!data) return;
+        
+        const modal = document.getElementById('platformModal');
+        const content = document.getElementById('modalContent');
+        
+        content.innerHTML = `
+            <div class="modal-content-section">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl" 
+                         style="background: ${data.color}20; color: ${data.color}">
+                        <i class="fas ${data.icon}"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">${data.title}</h2>
+                        <p class="text-slate-500">${data.description}</p>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+                    ${Object.entries(data.stats).map(([key, value]) => `
+                        <div class="bg-slate-50 p-3 rounded-xl text-center">
+                            <div class="text-lg font-bold text-slate-800">${value}</div>
+                            <div class="text-xs text-slate-500 capitalize">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- Features -->
+                <h4 class="font-semibold text-slate-800 mb-3"><i class="fas fa-star text-yellow-400 mr-2"></i>Xususiyatlar</h4>
+                <div class="grid grid-cols-2 gap-2 mb-6">
+                    ${data.features.map(f => `
+                        <div class="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-2 rounded-lg">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            ${f}
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- Quick Actions -->
+                <h4 class="font-semibold text-slate-800 mb-3"><i class="fas fa-bolt text-yellow-400 mr-2"></i>Tezkor amallar</h4>
+                <div class="flex gap-3 mb-6 flex-wrap">
+                    ${data.quickActions.map(a => `
+                        <button onclick="handleAction('${a.action}')" 
+                                class="px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center gap-2 text-sm">
+                            <i class="fas ${a.icon}"></i> ${a.label}
+                        </button>
+                    `).join('')}
+                </div>
+
+                <!-- Code Preview -->
+                <h4 class="font-semibold text-slate-800 mb-3"><i class="fas fa-code mr-2"></i>Kod namunasi</h4>
+                <div class="code-block">
+                    ${data.code}
+                </div>
+
+                <!-- Open Button -->
+                <div class="mt-6 flex gap-3">
+                    <button onclick="openFullPlatform('${type}')" 
+                            class="flex-1 py-3 rounded-xl font-semibold text-white transition"
+                            style="background: ${data.color}">
+                        <i class="fas fa-rocket mr-2"></i> 
+                        ${type === 'user' ? 'Foydalanuvchi' : type === 'teacher' ? 'O\'qituvchi' : 'Admin'} interfeysini ochish
+                    </button>
+                    <button onclick="closeModal()" 
+                            class="px-6 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition font-medium">
+                        Yopish
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        document.getElementById('platformModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    function handleAction(action) {
+        closeModal();
+        const messages = {
+            continueLearning: '📚 Darslarni davom ettirish sahifasiga o\'tish...',
+            viewLessons: '📖 Barcha darslar ro\'yxati ochilmoqda...',
+            viewLeaderboard: '🏆 Reyting jadvali ochilmoqda...',
+            createLesson: '📝 Yangi dars yaratish formasi ochilmoqda...',
+            addQuestion: '❓ Yangi savol qo\'shish formasi ochilmoqda...',
+            viewStudents: '👨‍🎓 O\'quvchilar ro\'yxati ochilmoqda...',
+            manageUsers: '👥 Foydalanuvchilarni boshqarish paneli ochilmoqda...',
+            manageLessons: '📚 Darslarni boshqarish paneli ochilmoqda...',
+            manageSettings: '⚙️ Sozlamalar paneli ochilmoqda...'
+        };
+        showToast(messages[action] || 'Amal bajarilmoqda...', 'info');
+    }
+
+    function openFullPlatform(type) {
+        closeModal();
+        const urls = {
+            user: 'index.html',
+            teacher: 'teacher.html',
+            admin: 'admin.html'
+        };
+        showToast(`🚀 ${type.charAt(0).toUpperCase() + type.slice(1)} interfeysi ochilmoqda...`, 'success');
+        setTimeout(() => {
+            window.location.href = urls[type] || '#';
+        }, 500);
+    }
+
+    // ============================================================
+    //  TOAST
+    // ============================================================
+    function showToast(message, type = 'info') {
+        const existing = document.querySelector('.toast-custom');
+        if (existing) existing.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast-custom fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-xl text-white font-medium transition-all';
+        const colors = {
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            info: 'bg-blue-500',
+            warning: 'bg-yellow-500'
+        };
+        toast.className += ' ' + (colors[type] || colors.info);
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    // ============================================================
+    //  KEYBOARD SHORTCUTS
+    // ============================================================
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === '1') openPlatform('user');
+        if (e.key === '2') openPlatform('teacher');
+        if (e.key === '3') openPlatform('admin');
+    });
+
+    // Close modal on click outside
+    document.getElementById('platformModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ============================================================
+    //  CONSOLE WELCOME
+    // ============================================================
+    console.log('%c📚 EnglishLearn 3-in-1 Platform', 'font-size: 24px; font-weight: bold; color: #667eea;');
+    console.log('%c🔑 Keyboard shortcuts:', 'font-size: 14px; font-weight: bold;');
+    console.log('  Press 1 → 👤 Foydalanuvchi interfeysi');
+    console.log('  Press 2 → 🧑‍🏫 O\'qituvchi interfeysi');
+    console.log('  Press 3 → 🔧 Admin panel');
+    console.log('  Press ESC → Yopish');
+    console.log('%c✨ 3-in-1 platform ishga tushdi!', 'font-size: 14px; color: #22c55e;');
+</script>
+
+</body>
+</html>

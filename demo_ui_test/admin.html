@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EnglishLearn — Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f1f5f9; }
+        .container-custom { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+        .page-section { display: none; animation: fadeIn 0.25s ease; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { 0% { opacity:0; transform:translateY(6px); } 100% { opacity:1; transform:translateY(0); } }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .sidebar-item { transition: all 0.2s; cursor: pointer; }
+        .sidebar-item:hover { background: #e2e8f0; }
+        .sidebar-item.active { background: #3b82f6; color: white; }
+        .sidebar-item.active i { color: white; }
+        .modal-bg { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-success { background: #22c55e; }
+        .toast-error { background: #ef4444; }
+        .toast-info { background: #3b82f6; }
+        .toast-warning { background: #f59e0b; }
+        .stat-card { transition: all 0.3s; }
+        .stat-card:hover { transform: scale(1.02); }
+        .table-row-hover:hover { background: #f8fafc; }
+        .badge-status { padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+        .badge-active { background: #dcfce7; color: #16a34a; }
+        .badge-inactive { background: #fee2e2; color: #dc2626; }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .admin-input { border: 2px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; width: 100%; transition: border 0.2s; }
+        .admin-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .admin-select { border: 2px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; width: 100%; background: white; }
+        .admin-select:focus { outline: none; border-color: #3b82f6; }
+        .admin-btn { padding: 8px 16px; border-radius: 8px; font-weight: 500; transition: all 0.2s; cursor: pointer; border: none; }
+        .admin-btn-primary { background: #3b82f6; color: white; }
+        .admin-btn-primary:hover { background: #2563eb; }
+        .admin-btn-success { background: #22c55e; color: white; }
+        .admin-btn-success:hover { background: #16a34a; }
+        .admin-btn-danger { background: #ef4444; color: white; }
+        .admin-btn-danger:hover { background: #dc2626; }
+        .admin-btn-warning { background: #f59e0b; color: white; }
+        .admin-btn-warning:hover { background: #d97706; }
+        .admin-btn-outline { background: transparent; border: 2px solid #e2e8f0; color: #475569; }
+        .admin-btn-outline:hover { background: #f1f5f9; }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { text-align: left; padding: 12px 16px; background: #f8fafc; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; }
+        .admin-table td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; }
+        .admin-table tr:hover { background: #f8fafc; }
+        .sidebar { width: 250px; min-height: calc(100vh - 64px); background: white; border-right: 1px solid #e2e8f0; }
+        .main-content { flex: 1; padding: 24px; }
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        @media (max-width: 768px) { .sidebar { width: 100%; min-height: auto; } .flex-admin { flex-direction: column; } }
+        .fade-enter { animation: fadeIn 0.3s ease; }
+        .question-item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+        .question-item:hover { background: #f8fafc; }
+    </style>
+</head>
+<body>
+
+<!-- ==================== NAVBAR ==================== -->
+<header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+    <div class="container-custom flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">📚</span>
+            <span class="text-xl font-bold text-slate-800">English<span class="text-blue-600">Learn</span></span>
+            <span class="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Admin</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-slate-600 hidden sm:inline" id="adminName">Admin</span>
+            <button onclick="handleAdminLogout()" class="text-red-500 hover:text-red-700 transition text-sm"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
+        </div>
+    </div>
+</header>
+
+<!-- ==================== MAIN ==================== -->
+<div class="flex flex-admin">
+    <!-- Sidebar -->
+    <aside class="sidebar p-4" id="adminSidebar">
+        <nav class="space-y-1">
+            <div class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-lg" data-page="dashboard" onclick="navigateAdmin('dashboard')">
+                <i class="fas fa-chart-pie w-5 text-slate-500"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg" data-page="users" onclick="navigateAdmin('users')">
+                <i class="fas fa-users w-5 text-slate-500"></i>
+                <span>Foydalanuvchilar</span>
+                <span class="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full" id="userCount">0</span>
+            </div>
+            <div class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg" data-page="lessons" onclick="navigateAdmin('lessons')">
+                <i class="fas fa-book w-5 text-slate-500"></i>
+                <span>Darslar</span>
+                <span class="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full" id="lessonCount">0</span>
+            </div>
+            <div class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg" data-page="questions" onclick="navigateAdmin('questions')">
+                <i class="fas fa-question-circle w-5 text-slate-500"></i>
+                <span>Savollar</span>
+            </div>
+            <div class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg" data-page="settings" onclick="navigateAdmin('settings')">
+                <i class="fas fa-cog w-5 text-slate-500"></i>
+                <span>Sozlamalar</span>
+            </div>
+            <hr class="my-4" />
+            <div class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-red-500" onclick="if(confirm('Haqiqatan ham chiqishni xohlaysizmi?')) window.location.href='index.html'">
+                <i class="fas fa-arrow-left w-5"></i>
+                <span>Saytga qaytish</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- ======== DASHBOARD ======== -->
+        <section id="admin-dashboard" class="page-section active">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">📊 Dashboard</h2>
+            
+            <div class="grid-stats mb-6">
+                <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-slate-500">Jami foydalanuvchilar</p>
+                            <p class="text-2xl font-bold text-slate-800" id="statUsers">0</p>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-users text-xl"></i></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2"><span class="text-green-500">↑ 12%</span> o'tgan oyga nisbatan</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-slate-500">Jami darslar</p>
+                            <p class="text-2xl font-bold text-slate-800" id="statLessons">0</p>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i class="fas fa-book text-xl"></i></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2"><span class="text-green-500">↑ 5%</span> o'tgan oyga nisbatan</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-slate-500">Jami savollar</p>
+                            <p class="text-2xl font-bold text-slate-800" id="statQuestions">0</p>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i class="fas fa-question-circle text-xl"></i></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2"><span class="text-green-500">↑ 8%</span> o'tgan oyga nisbatan</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-5 stat-card border border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-slate-500">Yakunlangan darslar</p>
+                            <p class="text-2xl font-bold text-slate-800" id="statCompleted">0</p>
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600"><i class="fas fa-check-circle text-xl"></i></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2"><span class="text-green-500">↑ 23%</span> o'tgan oyga nisbatan</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm p-5 border border-slate-100">
+                    <h3 class="font-semibold text-slate-800 mb-4">📈 Faollik grafigi</h3>
+                    <canvas id="activityChart" height="200"></canvas>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-5 border border-slate-100">
+                    <h3 class="font-semibold text-slate-800 mb-4">🏆 Top foydalanuvchilar</h3>
+                    <div id="topUsers" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-white rounded-xl shadow-sm p-5 border border-slate-100">
+                <h3 class="font-semibold text-slate-800 mb-4">📋 So'nggi faoliyatlar</h3>
+                <div id="recentActivities" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- ======== USERS ======== -->
+        <section id="admin-users" class="page-section">
+            <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+                <h2 class="text-2xl font-bold text-slate-800">👥 Foydalanuvchilar</h2>
+                <div class="flex gap-3 flex-wrap">
+                    <input type="text" id="userSearch" placeholder="Foydalanuvchi qidirish..." class="admin-input w-48" oninput="filterUsers()" />
+                    <button class="admin-btn admin-btn-danger" onclick="confirmDeleteAllUsers()"><i class="fas fa-trash"></i> Hammasini o'chirish</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Ism</th>
+                                <th>Email</th>
+                                <th>XP</th>
+                                <th>Daraja</th>
+                                <th>Tangalar</th>
+                                <th>Streak</th>
+                                <th>Darslar</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== LESSONS ======== -->
+        <section id="admin-lessons" class="page-section">
+            <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+                <h2 class="text-2xl font-bold text-slate-800">📖 Darslar</h2>
+                <div class="flex gap-3 flex-wrap">
+                    <button class="admin-btn admin-btn-primary" onclick="openLessonModal()"><i class="fas fa-plus"></i> Yangi dars</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nomi</th>
+                                <th>Bo'lim</th>
+                                <th>Bosqich</th>
+                                <th>Holat</th>
+                                <th>Savollar</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lessonsTableBodyAdmin"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== QUESTIONS ======== -->
+        <section id="admin-questions" class="page-section">
+            <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+                <h2 class="text-2xl font-bold text-slate-800">❓ Savollar</h2>
+                <div class="flex gap-3 flex-wrap">
+                    <select id="questionLessonFilter" class="admin-select w-48" onchange="filterQuestions()">
+                        <option value="all">Barcha darslar</option>
+                    </select>
+                    <button class="admin-btn admin-btn-primary" onclick="openQuestionModal()"><i class="fas fa-plus"></i> Yangi savol</button>
+                </div>
+            </div>
+            <div id="questionsList" class="space-y-3"></div>
+        </section>
+
+        <!-- ======== SETTINGS ======== -->
+        <section id="admin-settings" class="page-section">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">⚙️ Sozlamalar</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
+                    <h3 class="font-semibold text-slate-800 mb-4">Tizim sozlamalari</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Sayt nomi</label>
+                            <input type="text" id="settingSiteName" class="admin-input" value="EnglishLearn" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Darslar soni (sahifada)</label>
+                            <input type="number" id="settingLessonsPerPage" class="admin-input" value="10" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Maksimal savollar soni</label>
+                            <input type="number" id="settingMaxQuestions" class="admin-input" value="20" />
+                        </div>
+                        <button class="admin-btn admin-btn-primary w-full" onclick="saveSettings()">Saqlash</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
+                    <h3 class="font-semibold text-slate-800 mb-4">Ma'lumotlar</h3>
+                    <div class="space-y-3">
+                        <button class="admin-btn admin-btn-success w-full" onclick="exportData()"><i class="fas fa-download"></i> Ma'lumotlarni eksport qilish</button>
+                        <button class="admin-btn admin-btn-warning w-full" onclick="importData()"><i class="fas fa-upload"></i> Ma'lumotlarni import qilish</button>
+                        <button class="admin-btn admin-btn-danger w-full" onclick="if(confirm('Barcha ma\'lumotlarni o\'chirishni xohlaysizmi?')) clearAllData()"><i class="fas fa-trash"></i> Barcha ma'lumotlarni o'chirish</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Lesson Modal -->
+<div id="lessonModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button onclick="closeLessonModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fas fa-times"></i></button>
+        <h3 class="text-xl font-bold text-slate-800 mb-4" id="lessonModalTitle">Yangi dars qo'shish</h3>
+        <form onsubmit="event.preventDefault(); saveLesson();">
+            <input type="hidden" id="lessonEditId" />
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Dars nomi *</label>
+                <input type="text" id="lessonTitle" class="admin-input" required />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Bo'lim *</label>
+                <select id="lessonSection" class="admin-select" required>
+                    <option value="BEGINNER">Beginner</option>
+                    <option value="ELEMENTARY">Elementary</option>
+                    <option value="INTERMEDIATE">Intermediate</option>
+                    <option value="IELTS">IELTS</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Bosqich</label>
+                <input type="number" id="lessonStage" class="admin-input" value="1" min="1" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Holat</label>
+                <select id="lessonStatus" class="admin-select">
+                    <option value="active">Faol</option>
+                    <option value="locked">Yopiq</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Bepulmi?</label>
+                <select id="lessonFree" class="admin-select">
+                    <option value="true">Ha</option>
+                    <option value="false">Yo'q</option>
+                </select>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="admin-btn admin-btn-primary flex-1">Saqlash</button>
+                <button type="button" class="admin-btn admin-btn-outline" onclick="closeLessonModal()">Bekor qilish</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Question Modal -->
+<div id="questionModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button onclick="closeQuestionModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fas fa-times"></i></button>
+        <h3 class="text-xl font-bold text-slate-800 mb-4" id="questionModalTitle">Yangi savol qo'shish</h3>
+        <form onsubmit="event.preventDefault(); saveQuestion();">
+            <input type="hidden" id="questionEditId" />
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Dars *</label>
+                <select id="questionLesson" class="admin-select" required></select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Savol matni *</label>
+                <textarea id="questionText" class="admin-input" rows="2" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Variantlar *</label>
+                <div id="optionsContainer">
+                    <input type="text" id="option1" class="admin-input mb-2" placeholder="Variant A" required />
+                    <input type="text" id="option2" class="admin-input mb-2" placeholder="Variant B" required />
+                    <input type="text" id="option3" class="admin-input mb-2" placeholder="Variant C" />
+                    <input type="text" id="option4" class="admin-input mb-2" placeholder="Variant D" />
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">To'g'ri javob *</label>
+                <select id="questionCorrect" class="admin-select" required>
+                    <option value="">Tanlang</option>
+                    <option value="1">Variant A</option>
+                    <option value="2">Variant B</option>
+                    <option value="3">Variant C</option>
+                    <option value="4">Variant D</option>
+                </select>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="admin-btn admin-btn-primary flex-1">Saqlash</button>
+                <button type="button" class="admin-btn admin-btn-outline" onclick="closeQuestionModal()">Bekor qilish</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+    // ============================================================
+    //  DATA
+    // ============================================================
+    let adminData = {
+        users: [],
+        lessons: [],
+        questions: {},
+        settings: {
+            siteName: 'EnglishLearn',
+            lessonsPerPage: 10,
+            maxQuestions: 20
+        }
+    };
+
+    let currentAdminPage = 'dashboard';
+    let chartInstance = null;
+
+    // ============================================================
+    //  LOAD / SAVE DATA
+    // ============================================================
+    function loadAdminData() {
+        try {
+            const saved = localStorage.getItem('englishlearn_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                
+                // Load users
+                if (data.users) {
+                    adminData.users = Object.values(data.users).map(u => ({
+                        ...u,
+                        id: u.email || u.id
+                    }));
+                }
+
+                // Load lessons from ALL_LESSONS or from saved
+                const defaultLessons = [
+                    { id: 'l1', title: 'Greetings', section: 'BEGINNER', stage: 1, isFree: true, completed: false, stars: 0, locked: false },
+                    { id: 'l2', title: 'Family', section: 'BEGINNER', stage: 2, isFree: true, completed: false, stars: 0, locked: true },
+                    { id: 'l3', title: 'Daily Routine', section: 'BEGINNER', stage: 3, isFree: false, completed: false, stars: 0, locked: true },
+                    { id: 'l4', title: 'Food', section: 'BEGINNER', stage: 4, isFree: false, completed: false, stars: 0, locked: true },
+                    { id: 'l5', title: 'Shopping', section: 'BEGINNER', stage: 5, isFree: false, completed: false, stars: 0, locked: true },
+                    { id: 'e1', title: 'Numbers', section: 'ELEMENTARY', stage: 1, isFree: true, completed: false, stars: 0, locked: false },
+                    { id: 'e2', title: 'Time', section: 'ELEMENTARY', stage: 2, isFree: true, completed: false, stars: 0, locked: true },
+                    { id: 'e3', title: 'Weather', section: 'ELEMENTARY', stage: 3, isFree: false, completed: false, stars: 0, locked: true },
+                    { id: 'i1', title: 'IELTS Intro', section: 'IELTS', stage: 1, isFree: false, completed: false, stars: 0, locked: true },
+                    { id: 'i2', title: 'IELTS Listening', section: 'IELTS', stage: 2, isFree: false, completed: false, stars: 0, locked: true }
+                ];
+
+                // Check if we have lesson progress
+                if (data.lessonProgress) {
+                    adminData.lessons = defaultLessons.map(l => {
+                        const progress = data.lessonProgress[l.id];
+                        return {
+                            ...l,
+                            completed: progress ? progress.completed : false,
+                            stars: progress ? progress.stars : 0,
+                            locked: progress ? progress.locked : (l.stage > 1)
+                        };
+                    });
+                } else {
+                    adminData.lessons = defaultLessons;
+                }
+
+                // Load questions
+                if (data.questions) {
+                    adminData.questions = data.questions;
+                } else {
+                    // Default questions
+                    adminData.questions = {
+                        'l1': [
+                            { id: 'q1', text: 'What is the correct greeting in the morning?', options: ['Good morning', 'Good afternoon', 'Good evening', 'Good night'], correct: 'Good morning' },
+                            { id: 'q2', text: 'How do you say "hello" formally?', options: ['Hi', 'Hey', 'Good day', 'Hello'], correct: 'Hello' }
+                        ],
+                        'l2': [
+                            { id: 'q1', text: 'What is the father of your father called?', options: ['Uncle', 'Grandfather', 'Brother', 'Cousin'], correct: 'Grandfather' },
+                            { id: 'q2', text: 'Your mother\'s sister is your ...', options: ['Aunt', 'Uncle', 'Cousin', 'Grandmother'], correct: 'Aunt' },
+                            { id: 'q3', text: 'How many people are in a nuclear family?', options: ['2-4', '5-7', '8-10', '10+'], correct: '2-4' }
+                        ],
+                        'e1': [
+                            { id: 'q1', text: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: '4' },
+                            { id: 'q2', text: 'What number comes after 9?', options: ['8', '9', '10', '11'], correct: '10' },
+                            { id: 'q3', text: 'How many zeros in one hundred?', options: ['1', '2', '3', '4'], correct: '2' }
+                        ]
+                    };
+                }
+
+                // Load settings
+                if (data.settings) {
+                    adminData.settings = data.settings;
+                }
+
+                return true;
+            }
+        } catch (e) {
+            console.error('Error loading data:', e);
+        }
+        return false;
+    }
+
+    function saveAdminData() {
+        try {
+            const data = {
+                users: {},
+                lessonProgress: {},
+                questions: adminData.questions,
+                settings: adminData.settings
+            };
+
+            // Save users
+            adminData.users.forEach(u => {
+                data.users[u.email] = {
+                    name: u.name,
+                    email: u.email,
+                    xp: u.xp || 0,
+                    coins: u.coins || 0,
+                    streak: u.streak || 0,
+                    level: u.level || 1,
+                    completedLessons: u.completedLessons || 0,
+                    totalTime: u.totalTime || 0,
+                    bestStars: u.bestStars || 0,
+                    avgScore: u.avgScore || 0,
+                    achievements: u.achievements || 0,
+                    weakPoints: u.weakPoints || []
+                };
+            });
+
+            // Save lesson progress
+            adminData.lessons.forEach(l => {
+                data.lessonProgress[l.id] = {
+                    completed: l.completed || false,
+                    stars: l.stars || 0,
+                    locked: l.locked || false
+                };
+            });
+
+            localStorage.setItem('englishlearn_data', JSON.stringify(data));
+            return true;
+        } catch (e) {
+            console.error('Error saving data:', e);
+            return false;
+        }
+    }
+
+    // ============================================================
+    //  NAVIGATION
+    // ============================================================
+    function navigateAdmin(page) {
+        document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('admin-' + page);
+        if (target) target.classList.add('active');
+
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        const sidebarItem = document.querySelector(`.sidebar-item[data-page="${page}"]`);
+        if (sidebarItem) sidebarItem.classList.add('active');
+
+        currentAdminPage = page;
+
+        if (page === 'dashboard') renderDashboard();
+        else if (page === 'users') renderUsers();
+        else if (page === 'lessons') renderLessonsAdmin();
+        else if (page === 'questions') renderQuestionsAdmin();
+        else if (page === 'settings') renderSettings();
+    }
+
+    // ============================================================
+    //  DASHBOARD
+    // ============================================================
+    function renderDashboard() {
+        const totalUsers = adminData.users.length;
+        const totalLessons = adminData.lessons.length;
+        let totalQuestions = 0;
+        Object.values(adminData.questions).forEach(qs => totalQuestions += qs.length);
+        const completedLessons = adminData.lessons.filter(l => l.completed).length;
+
+        document.getElementById('statUsers').textContent = totalUsers;
+        document.getElementById('statLessons').textContent = totalLessons;
+        document.getElementById('statQuestions').textContent = totalQuestions;
+        document.getElementById('statCompleted').textContent = completedLessons;
+        document.getElementById('userCount').textContent = totalUsers;
+        document.getElementById('lessonCount').textContent = totalLessons;
+
+        // Top users
+        const topUsers = [...adminData.users].sort((a, b) => (b.xp || 0) - (a.xp || 0)).slice(0, 5);
+        const container = document.getElementById('topUsers');
+        container.innerHTML = '';
+        if (topUsers.length === 0) {
+            container.innerHTML = '<p class="text-slate-400 text-center py-4">Hali foydalanuvchilar yo\'q</p>';
+        } else {
+            topUsers.forEach((u, i) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50';
+                div.innerHTML = `
+                    <span class="font-bold text-slate-400 w-6">${i + 1}</span>
+                    <span class="font-medium flex-1">${u.name}</span>
+                    <span class="text-sm text-slate-500">${u.xp || 0} XP</span>
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Lv.${u.level || 1}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Recent activities
+        const activities = [
+            { user: 'Sarvar', action: 'Greetings darsini yakunladi', time: '5 min oldin' },
+            { user: 'Dilshod', action: 'Numbers darsini 3 yulduz bilan yakunladi', time: '15 min oldin' },
+            { user: 'Gulnora', action: 'Tizimga kirdi', time: '1 soat oldin' },
+            { user: 'Jasur', action: 'Family darsini boshladi', time: '2 soat oldin' }
+        ];
+        const actContainer = document.getElementById('recentActivities');
+        actContainer.innerHTML = '';
+        activities.forEach(a => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between p-2 bg-slate-50 rounded-lg';
+            div.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="font-medium text-sm">${a.user}</span>
+                    <span class="text-sm text-slate-600">${a.action}</span>
+                </div>
+                <span class="text-xs text-slate-400">${a.time}</span>
+            `;
+            actContainer.appendChild(div);
+        });
+
+        // Chart
+        if (chartInstance) chartInstance.destroy();
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan', 'Yak'],
+                datasets: [{
+                    label: 'Faol foydalanuvchilar',
+                    data: [12, 19, 15, 22, 28, 18, 14],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Yakunlangan darslar',
+                    data: [8, 12, 10, 15, 20, 12, 9],
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // ============================================================
+    //  USERS
+    // ============================================================
+    function renderUsers() {
+        const search = document.getElementById('userSearch').value.toLowerCase();
+        const filtered = adminData.users.filter(u => 
+            u.name.toLowerCase().includes(search) || 
+            u.email.toLowerCase().includes(search)
+        );
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">Foydalanuvchilar topilmadi</td></tr>`;
+            return;
+        }
+        filtered.forEach((u, i) => {
+            const tr = document.createElement('tr');
+            tr.className = 'table-row-hover';
+            tr.innerHTML = `
+                <td class="font-medium">${i + 1}</td>
+                <td><span class="font-medium">${u.name}</span></td>
+                <td class="text-slate-600">${u.email}</td>
+                <td><span class="font-medium">${u.xp || 0}</span></td>
+                <td><span class="badge-status badge-active">Lv.${u.level || 1}</span></td>
+                <td>🪙 ${u.coins || 0}</td>
+                <td>${u.streak || 0} 🔥</td>
+                <td>${u.completedLessons || 0}</td>
+                <td>
+                    <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="editUser('${u.email}')"><i class="fas fa-edit"></i></button>
+                    <button class="text-red-500 hover:text-red-700" onclick="deleteUser('${u.email}')"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterUsers() { renderUsers(); }
+
+    function deleteUser(email) {
+        if (!confirm(`"${email}" foydalanuvchini o'chirishni xohlaysizmi?`)) return;
+        adminData.users = adminData.users.filter(u => u.email !== email);
+        saveAdminData();
+        renderUsers();
+        renderDashboard();
+        showToast('Foydalanuvchi o\'chirildi', 'success');
+    }
+
+    function confirmDeleteAllUsers() {
+        if (!confirm('Barcha foydalanuvchilarni o\'chirishni xohlaysizmi? Bu amalni qaytarib bo\'lmaydi!')) return;
+        adminData.users = [];
+        saveAdminData();
+        renderUsers();
+        renderDashboard();
+        showToast('Barcha foydalanuvchilar o\'chirildi', 'warning');
+    }
+
+    function editUser(email) {
+        const user = adminData.users.find(u => u.email === email);
+        if (!user) return;
+        const newName = prompt('Ismni o\'zgartirish:', user.name);
+        if (newName !== null && newName.trim()) {
+            user.name = newName.trim();
+            saveAdminData();
+            renderUsers();
+            showToast('Foydalanuvchi tahrirlandi', 'success');
+        }
+    }
+
+    // ============================================================
+    //  LESSONS ADMIN
+    // ============================================================
+    function renderLessonsAdmin() {
+        const tbody = document.getElementById('lessonsTableBodyAdmin');
+        tbody.innerHTML = '';
+        adminData.lessons.forEach(l => {
+            const questions = adminData.questions[l.id] || [];
+            const tr = document.createElement('tr');
+            tr.className = 'table-row-hover';
+            tr.innerHTML = `
+                <td class="font-mono text-sm">${l.id}</td>
+                <td><span class="font-medium">${l.title}</span></td>
+                <td><span class="badge-status ${l.section === 'BEGINNER' ? 'badge-active' : 'badge-pending'}">${l.section}</span></td>
+                <td>${l.stage}</td>
+                <td><span class="badge-status ${l.locked ? 'badge-inactive' : 'badge-active'}">${l.locked ? 'Yopiq' : 'Faol'}</span></td>
+                <td>${questions.length}</td>
+                <td>
+                    <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="editLesson('${l.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="text-red-500 hover:text-red-700" onclick="deleteLesson('${l.id}')"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function openLessonModal(lessonId = null) {
+        const modal = document.getElementById('lessonModal');
+        modal.classList.remove('hidden');
+        if (lessonId) {
+            const lesson = adminData.lessons.find(l => l.id === lessonId);
+            if (lesson) {
+                document.getElementById('lessonModalTitle').textContent = 'Darsni tahrirlash';
+                document.getElementById('lessonEditId').value = lesson.id;
+                document.getElementById('lessonTitle').value = lesson.title;
+                document.getElementById('lessonSection').value = lesson.section;
+                document.getElementById('lessonStage').value = lesson.stage;
+                document.getElementById('lessonStatus').value = lesson.locked ? 'locked' : 'active';
+                document.getElementById('lessonFree').value = lesson.isFree ? 'true' : 'false';
+            }
+        } else {
+            document.getElementById('lessonModalTitle').textContent = 'Yangi dars qo\'shish';
+            document.getElementById('lessonEditId').value = '';
+            document.getElementById('lessonTitle').value = '';
+            document.getElementById('lessonSection').value = 'BEGINNER';
+            document.getElementById('lessonStage').value = '1';
+            document.getElementById('lessonStatus').value = 'active';
+            document.getElementById('lessonFree').value = 'true';
+        }
+    }
+
+    function closeLessonModal() {
+        document.getElementById('lessonModal').classList.add('hidden');
+    }
+
+    function saveLesson() {
+        const id = document.getElementById('lessonEditId').value;
+        const title = document.getElementById('lessonTitle').value.trim();
+        const section = document.getElementById('lessonSection').value;
+        const stage = parseInt(document.getElementById('lessonStage').value);
+        const status = document.getElementById('lessonStatus').value;
+        const isFree = document.getElementById('lessonFree').value === 'true';
+
+        if (!title) {
+            showToast('Iltimos, dars nomini kiriting', 'error');
+            return;
+        }
+
+        if (id) {
+            // Edit existing
+            const lesson = adminData.lessons.find(l => l.id === id);
+            if (lesson) {
+                lesson.title = title;
+                lesson.section = section;
+                lesson.stage = stage;
+                lesson.locked = status === 'locked';
+                lesson.isFree = isFree;
+                showToast('Dars tahrirlandi', 'success');
+            }
+        } else {
+            // Create new
+            const newId = 'l' + Date.now().toString(36);
+            adminData.lessons.push({
+                id: newId,
+                title: title,
+                section: section,
+                stage: stage,
+                isFree: isFree,
+                completed: false,
+                stars: 0,
+                locked: status === 'locked'
+            });
+            adminData.questions[newId] = [];
+            showToast('Yangi dars qo\'shildi', 'success');
+        }
+
+        saveAdminData();
+        closeLessonModal();
+        renderLessonsAdmin();
+        renderDashboard();
+        // Update question dropdown
+        populateQuestionLessonDropdown();
+    }
+
+    function editLesson(id) {
+        openLessonModal(id);
+    }
+
+    function deleteLesson(id) {
+        if (!confirm(`"${id}" darsni o'chirishni xohlaysizmi?`)) return;
+        adminData.lessons = adminData.lessons.filter(l => l.id !== id);
+        delete adminData.questions[id];
+        saveAdminData();
+        renderLessonsAdmin();
+        renderDashboard();
+        populateQuestionLessonDropdown();
+        showToast('Dars o\'chirildi', 'warning');
+    }
+
+    // ============================================================
+    //  QUESTIONS ADMIN
+    // ============================================================
+    function renderQuestionsAdmin() {
+        const filter = document.getElementById('questionLessonFilter').value;
+        let allQuestions = [];
+        Object.keys(adminData.questions).forEach(lessonId => {
+            if (filter === 'all' || filter === lessonId) {
+                adminData.questions[lessonId].forEach(q => {
+                    allQuestions.push({ ...q, lessonId });
+                });
+            }
+        });
+
+        const container = document.getElementById('questionsList');
+        container.innerHTML = '';
+        if (allQuestions.length === 0) {
+            container.innerHTML = '<div class="bg-white rounded-xl shadow-sm p-8 text-center border border-slate-100"><p class="text-slate-400">Savollar topilmadi</p></div>';
+            return;
+        }
+        allQuestions.forEach(q => {
+            const div = document.createElement('div');
+            div.className = 'question-item bg-white border border-slate-200 rounded-lg';
+            const lesson = adminData.lessons.find(l => l.id === q.lessonId);
+            div.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-medium">${q.text}</span>
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">${lesson ? lesson.title : q.lessonId}</span>
+                        </div>
+                        <div class="flex gap-3 text-sm text-slate-600">
+                            ${q.options.map((opt, i) => `<span>${String.fromCharCode(65 + i)}. ${opt} ${opt === q.correct ? '✅' : ''}</span>`).join(' ')}
+                        </div>
+                    </div>
+                    <div class="flex gap-2 ml-4">
+                        <button class="text-blue-600 hover:text-blue-800" onclick="editQuestion('${q.lessonId}', '${q.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="text-red-500 hover:text-red-700" onclick="deleteQuestion('${q.lessonId}', '${q.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function filterQuestions() { renderQuestionsAdmin(); }
+
+    function populateQuestionLessonDropdown() {
+        const select = document.getElementById('questionLesson');
+        select.innerHTML = '';
+        adminData.lessons.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l.id;
+            opt.textContent = `${l.title} (${l.section})`;
+            select.appendChild(opt);
+        });
+        // Also update filter dropdown
+        const filterSelect = document.getElementById('questionLessonFilter');
+        filterSelect.innerHTML = '<option value="all">Barcha darslar</option>';
+        adminData.lessons.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l.id;
+            opt.textContent = l.title;
+            filterSelect.appendChild(opt);
+        });
+    }
+
+    function openQuestionModal(lessonId = null, questionId = null) {
+        const modal = document.getElementById('questionModal');
+        modal.classList.remove('hidden');
+        populateQuestionLessonDropdown();
+
+        if (questionId && lessonId) {
+            const questions = adminData.questions[lessonId] || [];
+            const q = questions.find(q => q.id === questionId);
+            if (q) {
+                document.getElementById('questionModalTitle').textContent = 'Savolni tahrirlash';
+                document.getElementById('questionEditId').value = q.id;
+                document.getElementById('questionLesson').value = lessonId;
+                document.getElementById('questionText').value = q.text;
+                q.options.forEach((opt, i) => {
+                    document.getElementById(`option${i + 1}`).value = opt || '';
+                });
+                const correctIndex = q.options.indexOf(q.correct) + 1;
+                document.getElementById('questionCorrect').value = correctIndex > 0 ? correctIndex : '';
+                return;
+            }
+        }
+
+        // New question
+        document.getElementById('questionModalTitle').textContent = 'Yangi savol qo\'shish';
+        document.getElementById('questionEditId').value = '';
+        if (lessonId) {
+            document.getElementById('questionLesson').value = lessonId;
+        }
+        document.getElementById('questionText').value = '';
+        document.getElementById('option1').value = '';
+        document.getElementById('option2').value = '';
+        document.getElementById('option3').value = '';
+        document.getElementById('option4').value = '';
+        document.getElementById('questionCorrect').value = '';
+    }
+
+    function closeQuestionModal() {
+        document.getElementById('questionModal').classList.add('hidden');
+    }
+
+    function saveQuestion() {
+        const lessonId = document.getElementById('questionLesson').value;
+        const editId = document.getElementById('questionEditId').value;
+        const text = document.getElementById('questionText').value.trim();
+        const options = [
+            document.getElementById('option1').value.trim(),
+            document.getElementById('option2').value.trim(),
+            document.getElementById('option3').value.trim(),
+            document.getElementById('option4').value.trim()
+        ].filter(o => o);
+        const correctIndex = parseInt(document.getElementById('questionCorrect').value);
+
+        if (!lessonId) {
+            showToast('Iltimos, darsni tanlang', 'error');
+            return;
+        }
+        if (!text) {
+            showToast('Iltimos, savol matnini kiriting', 'error');
+            return;
+        }
+        if (options.length < 2) {
+            showToast('Kamida 2 ta variant kiriting', 'error');
+            return;
+        }
+        if (!correctIndex || correctIndex < 1 || correctIndex > options.length) {
+            showToast('Iltimos, to\'g\'ri javobni tanlang', 'error');
+            return;
+        }
+
+        if (!adminData.questions[lessonId]) {
+            adminData.questions[lessonId] = [];
+        }
+
+        const correct = options[correctIndex - 1];
+
+        if (editId) {
+            // Edit existing
+            const q = adminData.questions[lessonId].find(q => q.id === editId);
+            if (q) {
+                q.text = text;
+                q.options = options;
+                q.correct = correct;
+                showToast('Savol tahrirlandi', 'success');
+            }
+        } else {
+            // New question
+            const newId = 'q' + Date.now().toString(36);
+            adminData.questions[lessonId].push({
+                id: newId,
+                text: text,
+                options: options,
+                correct: correct
+            });
+            showToast('Yangi savol qo\'shildi', 'success');
+        }
+
+        saveAdminData();
+        closeQuestionModal();
+        renderQuestionsAdmin();
+        renderDashboard();
+    }
+
+    function editQuestion(lessonId, questionId) {
+        openQuestionModal(lessonId, questionId);
+    }
+
+    function deleteQuestion(lessonId, questionId) {
+        if (!confirm('Savolni o\'chirishni xohlaysizmi?')) return;
+        if (adminData.questions[lessonId]) {
+            adminData.questions[lessonId] = adminData.questions[lessonId].filter(q => q.id !== questionId);
+            saveAdminData();
+            renderQuestionsAdmin();
+            renderDashboard();
+            showToast('Savol o\'chirildi', 'warning');
+        }
+    }
+
+    // ============================================================
+    //  SETTINGS
+    // ============================================================
+    function renderSettings() {
+        document.getElementById('settingSiteName').value = adminData.settings.siteName || 'EnglishLearn';
+        document.getElementById('settingLessonsPerPage').value = adminData.settings.lessonsPerPage || 10;
+        document.getElementById('settingMaxQuestions').value = adminData.settings.maxQuestions || 20;
+    }
+
+    function saveSettings() {
+        adminData.settings.siteName = document.getElementById('settingSiteName').value.trim() || 'EnglishLearn';
+        adminData.settings.lessonsPerPage = parseInt(document.getElementById('settingLessonsPerPage').value) || 10;
+        adminData.settings.maxQuestions = parseInt(document.getElementById('settingMaxQuestions').value) || 20;
+        saveAdminData();
+        showToast('Sozlamalar saqlandi', 'success');
+    }
+
+    function exportData() {
+        const data = localStorage.getItem('englishlearn_data');
+        if (!data) {
+            showToast('Ma\'lumotlar topilmadi', 'error');
+            return;
+        }
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `englishlearn_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Ma\'lumotlar eksport qilindi', 'success');
+    }
+
+    function importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    localStorage.setItem('englishlearn_data', JSON.stringify(data));
+                    loadAdminData();
+                    renderAll();
+                    showToast('Ma\'lumotlar import qilindi', 'success');
+                } catch (err) {
+                    showToast('Xato: noto\'g\'ri fayl formati', 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+
+    function clearAllData() {
+        if (!confirm('Barcha ma\'lumotlarni o\'chirishni xohlaysizmi? Bu amalni qaytarib bo\'lmaydi!')) return;
+        localStorage.removeItem('englishlearn_data');
+        adminData = {
+            users: [],
+            lessons: [],
+            questions: {},
+            settings: { siteName: 'EnglishLearn', lessonsPerPage: 10, maxQuestions: 20 }
+        };
+        // Reset lessons
+        const defaultLessons = [
+            { id: 'l1', title: 'Greetings', section: 'BEGINNER', stage: 1, isFree: true, completed: false, stars: 0, locked: false },
+            { id: 'l2', title: 'Family', section: 'BEGINNER', stage: 2, isFree: true, completed: false, stars: 0, locked: true },
+            { id: 'e1', title: 'Numbers', section: 'ELEMENTARY', stage: 1, isFree: true, completed: false, stars: 0, locked: false }
+        ];
+        adminData.lessons = defaultLessons;
+        adminData.questions = {
+            'l1': [
+                { id: 'q1', text: 'What is the correct greeting in the morning?', options: ['Good morning', 'Good afternoon', 'Good evening', 'Good night'], correct: 'Good morning' }
+            ],
+            'e1': [
+                { id: 'q1', text: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: '4' }
+            ]
+        };
+        saveAdminData();
+        renderAll();
+        showToast('Barcha ma\'lumotlar tozalandi', 'warning');
+    }
+
+    // ============================================================
+    //  TOAST
+    // ============================================================
+    function showToast(message, type = 'info') {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 3000);
+    }
+
+    // ============================================================
+    //  ADMIN LOGOUT
+    // ============================================================
+    function handleAdminLogout() {
+        if (confirm('Admin panelidan chiqishni xohlaysizmi?')) {
+            window.location.href = 'index.html';
+        }
+    }
+
+    // ============================================================
+    //  RENDER ALL
+    // ============================================================
+    function renderAll() {
+        renderDashboard();
+        renderUsers();
+        renderLessonsAdmin();
+        renderQuestionsAdmin();
+        renderSettings();
+        populateQuestionLessonDropdown();
+    }
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load data
+        const loaded = loadAdminData();
+        if (!loaded) {
+            // Initialize with default data
+            const defaultLessons = [
+                { id: 'l1', title: 'Greetings', section: 'BEGINNER', stage: 1, isFree: true, completed: false, stars: 0, locked: false },
+                { id: 'l2', title: 'Family', section: 'BEGINNER', stage: 2, isFree: true, completed: false, stars: 0, locked: true },
+                { id: 'e1', title: 'Numbers', section: 'ELEMENTARY', stage: 1, isFree: true, completed: false, stars: 0, locked: false }
+            ];
+            adminData.lessons = defaultLessons;
+            adminData.questions = {
+                'l1': [
+                    { id: 'q1', text: 'What is the correct greeting in the morning?', options: ['Good morning', 'Good afternoon', 'Good evening', 'Good night'], correct: 'Good morning' }
+                ],
+                'e1': [
+                    { id: 'q1', text: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: '4' }
+                ]
+            };
+            saveAdminData();
+        }
+
+        // Set admin name
+        document.getElementById('adminName').textContent = 'Admin';
+
+        // Render all
+        renderAll();
+
+        console.log('✅ Admin panel ishga tushdi!');
+    });
+
+    // Close modals on ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeLessonModal();
+            closeQuestionModal();
+        }
+    });
+
+    // Click outside modal to close
+    document.getElementById('lessonModal').addEventListener('click', function(e) {
+        if (e.target === this) closeLessonModal();
+    });
+    document.getElementById('questionModal').addEventListener('click', function(e) {
+        if (e.target === this) closeQuestionModal();
+    });
+</script>
+
+</body>
+</html>
